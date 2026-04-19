@@ -56,7 +56,7 @@ export interface PathStep {
   label: string;
   protocol?: string;
   detail: string;
-  status?: "normal" | "fallback";
+  status?: "normal" | "fallback" | "decision";
 }
 
 export interface RoutePlan {

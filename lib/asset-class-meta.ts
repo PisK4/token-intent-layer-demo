@@ -14,12 +14,14 @@ export const ASSET_CLASS_META: Record<
   native: {
     label: "Native Asset",
     color: "#22C55E",
-    description: "ETH / BTC / SOL 等原生资产，走 Vault",
+    description:
+      "ETH / BTC / SOL 原生资产；Vault 直接交付，库存不足时 solver 跨链 fill",
   },
   omnichain: {
     label: "Omnichain Standard",
     color: "#06B6D4",
-    description: "OFT/NTT 标准互通资产（ENA / AAVE / LINK）",
+    description:
+      "OFT/NTT 互通资产（ENA / AAVE / LINK）；库存不足走跨链协议再平衡，不走 Solver",
   },
   yield: {
     label: "Yield Collateral",
@@ -29,7 +31,8 @@ export const ASSET_CLASS_META: Record<
   routable: {
     label: "Routable Asset",
     color: "#F59E0B",
-    description: "UNI / PEPE 等原 Token 进出，solver 在目标链交付",
+    description:
+      "UNI / PEPE / WBTC 等原 Token 进出；目标链库存不足时 solver 跨链调度",
   },
   "source-only": {
     label: "Source-only",

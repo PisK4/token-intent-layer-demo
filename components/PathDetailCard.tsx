@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, CircleAlert, ArrowRight, Route } from "lucide-react";
+import { CircleCheck, CircleAlert, GitFork, ArrowRight, Route } from "lucide-react";
 import clsx from "clsx";
 import { RAIL_META } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
@@ -69,7 +69,12 @@ export default function PathDetailCard({ plan }: Props) {
       <ol className="space-y-3">
         {plan.steps.map((step, i) => {
           const isFallback = step.status === "fallback";
-          const Icon = isFallback ? CircleAlert : CircleCheck;
+          const isDecision = step.status === "decision";
+          const Icon = isFallback
+            ? CircleAlert
+            : isDecision
+              ? GitFork
+              : CircleCheck;
           return (
             <li
               key={i}
@@ -79,22 +84,31 @@ export default function PathDetailCard({ plan }: Props) {
                 <span
                   className={clsx(
                     "absolute left-[14px] top-6 h-[calc(100%_-_8px)] w-px",
-                    isFallback ? "bg-amber-500/30" : "bg-white/10",
+                    isFallback && "bg-amber-500/30",
+                    isDecision && "bg-sky-500/30",
+                    !isFallback && !isDecision && "bg-white/10",
                   )}
                   style={{
                     backgroundImage: isFallback
                       ? "linear-gradient(to bottom, #F59E0B 33%, transparent 33%)"
-                      : undefined,
-                    backgroundSize: isFallback ? "1px 6px" : undefined,
+                      : isDecision
+                        ? "linear-gradient(to bottom, #0EA5E9 33%, transparent 33%)"
+                        : undefined,
+                    backgroundSize:
+                      isFallback || isDecision ? "1px 6px" : undefined,
                   }}
                 />
               )}
               <div
                 className={clsx(
                   "relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
-                  isFallback
-                    ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
-                    : "border-accent/40 bg-accent/10 text-accent",
+                  isFallback &&
+                    "border-amber-500/40 bg-amber-500/10 text-amber-400",
+                  isDecision &&
+                    "border-sky-500/40 bg-sky-500/10 text-sky-400",
+                  !isFallback &&
+                    !isDecision &&
+                    "border-accent/40 bg-accent/10 text-accent",
                 )}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -111,6 +125,9 @@ export default function PathDetailCard({ plan }: Props) {
                   )}
                   {isFallback && (
                     <span className="pill pill-source-only">fallback</span>
+                  )}
+                  {isDecision && (
+                    <span className="pill pill-check">check</span>
                   )}
                 </div>
                 <p className="mt-0.5 text-[11px] leading-relaxed text-muted">

@@ -135,6 +135,18 @@ export function planRoute(
       detail: `目标：${targetAccount}`,
     });
 
+    // Liquidity Check 决策节点：所有 withdraw 路径统一插入
+    // Source-only 检查的是源链库存；其他检查的是目标链库存
+    const checkScope =
+      token.commitment === "source-only"
+        ? `检查源链 ${chain.name} 上 ${token.symbol} 的 Vault 入金累积库存`
+        : `检查目标链 ${chain.name} 上 ${token.symbol} 的库存是否充足`;
+    steps.push({
+      label: "Liquidity Check · 目标链库存判定",
+      detail: checkScope,
+      status: "decision",
+    });
+
     if (token.commitment === "source-only") {
       steps.push({
         label: "源链 Vault 直接交付原 Token",
@@ -160,17 +172,26 @@ export function planRoute(
         steps.push({
           label: "目标链 Vault 直接交付",
           protocol: "EdgeX Vault",
-          detail: `${token.symbol} 同资产交付`,
+          detail: `${token.symbol} 同资产交付，无需跨链调度`,
           status: "normal",
         });
-      } else {
+      } else if (token.assetClass === "routable") {
         steps.push({
-          label: "Intent Layer Fallback",
-          protocol: "CoW / UniswapX / 1inch",
-          detail: `solver 在 ${chain.name} 买入 ${token.symbol} 后交付用户`,
+          label: "Solver 网络跨链调度",
+          protocol: "UniswapX / CoW / 1inch",
+          detail: `从库存充裕链（如 Base）调度 ${token.symbol}，solver 在 ${chain.name} DEX 完成交付`,
           status: "fallback",
         });
-        note = "库存不足时切换到 solver route，用户仍收到原资产";
+        note = "Routable Asset 库存不足时 solver 在任意支持链买入并跨链交付，用户仍收到原 Token";
+      } else {
+        // Native Asset（ETH / BTC / SOL / EDGE / AVAX / POL / BNB / HYPE / APT / SUI / SEI）
+        steps.push({
+          label: "Solver 网络跨链调度",
+          protocol: "UniswapX / CoW / 1inch",
+          detail: `从其他 EVM 链（如 Base）调度 ${token.symbol} 到 ${chain.name} 交付用户`,
+          status: "fallback",
+        });
+        note = "Native Asset 库存不足时 solver 跨链 fill，用户仍收到原资产";
       }
     } else if (rail === "layerzero") {
       if (stockSufficient) {
@@ -182,12 +203,12 @@ export function planRoute(
         });
       } else {
         steps.push({
-          label: "OFT Rebalancing 再平衡",
+          label: "OFT Rebalancing · 跨链协议再平衡",
           protocol: "LayerZero OFT",
-          detail: "零价格冲击跨链补足库存后交付",
+          detail: "从库存充裕链通过 OFT 协议跨链搬运，零价格冲击，不经过 Solver 网络",
           status: "fallback",
         });
-        note = "OFT 再平衡优先，solver DEX 降级补位";
+        note = "Omnichain-standard Asset 优先用跨链协议调度库存，Solver DEX 仅作降级";
       }
     } else if (rail === "intent-layer") {
       steps.push({
