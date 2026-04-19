@@ -21,7 +21,6 @@ const UNIT_PRICE: Record<string, number> = {
   USDC: 1,
   USDT: 1,
   ETH: 3360,
-  BTC: 95000,
   WBTC: 95000,
   cbBTC: 95000,
   SOL: 180,

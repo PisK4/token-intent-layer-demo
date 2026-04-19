@@ -71,6 +71,7 @@ export default function Home() {
             onChainChange={setChainId}
             onTokenChange={setTokenSymbol}
           />
+          <PathDetailCard plan={plan} />
           <SwapInterface
             direction={direction}
             tokenSymbol={tokenSymbol}
@@ -79,7 +80,6 @@ export default function Home() {
             onToggleStock={() => setStockSufficient((s) => !s)}
             onPreview={onPreview}
           />
-          <PathDetailCard plan={plan} />
         </aside>
 
         <section className="flex min-h-[640px] flex-col gap-5">

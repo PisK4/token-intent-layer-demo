@@ -15,7 +15,7 @@ export const ASSET_CLASS_META: Record<
     label: "Native Asset",
     color: "#22C55E",
     description:
-      "ETH / BTC / SOL 原生资产；Vault 直接交付，库存不足时 solver 跨链 fill",
+      "ETH / SOL / EDGE 等原生资产；Vault 直接交付，库存不足时 solver 跨链 fill",
   },
   omnichain: {
     label: "Omnichain Standard",
