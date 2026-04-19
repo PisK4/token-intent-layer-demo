@@ -47,7 +47,7 @@ export default function SankeyDiagram({
             ? "USDC @ EdgeX"
             : token.finalAccount === "ETH"
               ? "ETH @ EdgeX"
-              : "Token-as-is @ EdgeX";
+              : "Token @ EdgeX";
         highlightSet.add(chain.name);
         highlightSet.add(assetLabel);
         highlightSet.add(railLabel);

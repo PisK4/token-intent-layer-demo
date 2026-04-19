@@ -20,13 +20,13 @@ function depthOf(
   return { ledger: 0, rail: 1, asset: 2, chain: 3 }[kind];
 }
 
-const LEDGER_ACCOUNTS = ["USDC @ EdgeX", "ETH @ EdgeX", "Token-as-is @ EdgeX"];
+const LEDGER_ACCOUNTS = ["USDC @ EdgeX", "ETH @ EdgeX", "Token @ EdgeX"];
 
 const FINAL_LEDGER_MAP: Record<string, string> = {
   USDC: "USDC @ EdgeX",
   ETH: "ETH @ EdgeX",
-  SOL: "Token-as-is @ EdgeX",
-  self: "Token-as-is @ EdgeX",
+  SOL: "Token @ EdgeX",
+  self: "Token @ EdgeX",
 };
 
 function primaryRail(token: Token): string {

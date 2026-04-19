@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import TokenChainSelector from "@/components/TokenChainSelector";
 import SwapInterface from "@/components/SwapInterface";
 import SankeyDiagram from "@/components/SankeyDiagram";
 import PathDetailCard from "@/components/PathDetailCard";
+import BubbleUniverse from "@/components/BubbleUniverse";
 import { planRoute } from "@/lib/route-planner";
-import { TOKENS, isWithdrawable } from "@/lib/data-loader";
+import { TOKENS, TOKEN_MAP, isWithdrawable } from "@/lib/data-loader";
 import type { Direction } from "@/lib/types";
 
 export default function Home() {
@@ -43,6 +44,20 @@ export default function Home() {
 
   const onPreview = () => setHighlightVersion((v) => v + 1);
 
+  // Bubble Universe 点击一个 token → 若当前链不支持则切到首个支持链；并触发 Sankey 高亮脉冲
+  const onSelectTokenFromBubble = useCallback(
+    (symbol: string) => {
+      const t = TOKEN_MAP[symbol];
+      if (!t) return;
+      setTokenSymbol(symbol);
+      if (!t.chains.includes(chainId)) {
+        setChainId(t.chains[0]);
+      }
+      setHighlightVersion((v) => v + 1);
+    },
+    [chainId],
+  );
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1440px] px-4 py-6 md:px-8 md:py-10">
       <Header direction={direction} onDirectionChange={setDirection} />
@@ -67,12 +82,17 @@ export default function Home() {
           <PathDetailCard plan={plan} />
         </aside>
 
-        <section className="min-h-[640px]">
+        <section className="flex min-h-[640px] flex-col gap-5">
           <SankeyDiagram
             direction={direction}
             highlightTokenSymbol={tokenSymbol}
             highlightChainId={chainId}
             highlightVersion={highlightVersion}
+          />
+          <BubbleUniverse
+            direction={direction}
+            selectedTokenSymbol={tokenSymbol}
+            onSelectToken={onSelectTokenFromBubble}
           />
         </section>
       </div>
