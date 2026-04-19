@@ -1,10 +1,23 @@
-import { CHAINS, TOKENS, RAIL_META } from "./data-loader";
+import { CHAINS, TOKENS, RAIL_META, isWithdrawable } from "./data-loader";
 import { ASSET_CLASS_META } from "./asset-class-meta";
 import type { Direction, SankeyLink, SankeyNode, Token } from "./types";
 
 interface SankeyDataset {
   nodes: SankeyNode[];
   links: SankeyLink[];
+}
+
+// 方向决定 node 的水平位置：
+// - Deposit : Chain(0)  → AssetClass(1) → Rail(2) → Ledger(3)
+// - Withdraw: Ledger(0) → Rail(1)       → AssetClass(2) → Chain(3)
+function depthOf(
+  kind: "chain" | "asset" | "rail" | "ledger",
+  direction: Direction,
+): number {
+  if (direction === "deposit") {
+    return { chain: 0, asset: 1, rail: 2, ledger: 3 }[kind];
+  }
+  return { ledger: 0, rail: 1, asset: 2, chain: 3 }[kind];
 }
 
 const LEDGER_ACCOUNTS = ["USDC @ EdgeX", "ETH @ EdgeX", "Token-as-is @ EdgeX"];
@@ -69,28 +82,31 @@ export function buildSankeyData(direction: Direction): SankeyDataset {
   };
 
   // Build source chain -> asset class -> rail -> ledger
+  // Withdraw 模式下跳过不可提现的 token（stETH / aUSDC / Long-tail 等归一化资产）
   for (const token of TOKENS) {
+    if (direction === "withdraw" && !isWithdrawable(token)) continue;
+
     const assetMeta = ASSET_CLASS_META[token.assetClass];
     const assetNode = assetMeta.label;
-    addNode(assetNode, assetMeta.color, 1);
+    addNode(assetNode, assetMeta.color, depthOf("asset", direction));
 
     const rail = primaryRail(token);
     const railMeta = RAIL_META[rail as keyof typeof RAIL_META];
     const railNode = railMeta.label;
-    addNode(railNode, railMeta.color, 2);
+    addNode(railNode, railMeta.color, depthOf("rail", direction));
 
     const ledger = FINAL_LEDGER_MAP[token.finalAccount] ?? LEDGER_ACCOUNTS[2];
     const ledgerColor =
       token.finalAccount === "USDC" || token.finalAccount === "ETH"
         ? "#22C55E"
         : "#3B82F6";
-    addNode(ledger, ledgerColor, 3);
+    addNode(ledger, ledgerColor, depthOf("ledger", direction));
 
     for (const chainId of token.chains) {
       const chain = CHAINS.find((c) => c.id === chainId);
       if (!chain) continue;
       const chainNode = chain.name;
-      addNode(chainNode, chain.color, 0);
+      addNode(chainNode, chain.color, depthOf("chain", direction));
 
       const value = weightFor(token, token.chains.length);
 

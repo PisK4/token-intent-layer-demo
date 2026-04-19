@@ -23,6 +23,13 @@ export const TOKEN_MAP: Record<string, Token> = Object.fromEntries(
   TOKENS.map((t) => [t.symbol, t]),
 );
 
+// Withdraw 可见性：EdgeX Ledger 实际持有该 symbol 才能原 Token 提现。
+// - finalAccount === "self"：原 Token 入账（UNI / PEPE / ONDO / SOL 等）→ 可提现
+// - symbol === finalAccount：本身就是归一化终态（USDC / ETH）→ 可提现
+// - 其他（stETH / wstETH / aUSDC / MOG / long-tail 等）：Deposit 时已归一化，Ledger 不持有该 symbol → 不可提现
+export const isWithdrawable = (t: Token): boolean =>
+  t.finalAccount === "self" || t.symbol === t.finalAccount;
+
 // Development-only sanity checks to catch common JSON misconfig early.
 if (process.env.NODE_ENV !== "production") {
   const chainIds = new Set(CHAINS.map((c) => c.id));

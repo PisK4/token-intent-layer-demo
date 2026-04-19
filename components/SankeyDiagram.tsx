@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { buildSankeyData } from "@/lib/sankey-data";
 import { TOKEN_MAP, CHAIN_MAP, RAIL_META } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
@@ -141,18 +142,50 @@ export default function SankeyDiagram({
     };
   }, [direction, highlightTokenSymbol, highlightChainId, highlightVersion]);
 
+  const isDeposit = direction === "deposit";
+  const leftEndpoint = isDeposit ? "Source Chain" : "EdgeX Ledger";
+  const rightEndpoint = isDeposit ? "EdgeX Ledger" : "Target Chain";
+  const directionColor = isDeposit ? "#22C55E" : "#F59E0B";
+
   return (
     <div className="glass-card h-full p-3 md:p-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 px-1">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-2 px-1">
         <div>
           <h2 className="font-display text-base font-semibold">
             Intent Path Flow
           </h2>
-          <p className="text-[11px] text-muted">
-            {direction === "deposit"
-              ? "Source Chain → Asset Class → Protocol Rail → EdgeX Ledger"
-              : "EdgeX Ledger → Protocol Rail → Asset Class → Target Chain"}
-          </p>
+          <div className="mt-1.5 flex items-center gap-2">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider"
+              style={{
+                color: directionColor,
+                borderColor: directionColor + "50",
+                backgroundColor: directionColor + "15",
+              }}
+            >
+              {isDeposit ? (
+                <ArrowRight className="h-3 w-3" />
+              ) : (
+                <ArrowLeft className="h-3 w-3" />
+              )}
+              {isDeposit ? "Deposit" : "Withdraw"}
+            </span>
+            <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted">
+              <span className="text-foreground">{leftEndpoint}</span>
+              {isDeposit ? (
+                <ArrowRight
+                  className="h-3 w-3 animate-flow-pulse"
+                  style={{ color: directionColor }}
+                />
+              ) : (
+                <ArrowLeft
+                  className="h-3 w-3 animate-flow-pulse"
+                  style={{ color: directionColor }}
+                />
+              )}
+              <span className="text-foreground">{rightEndpoint}</span>
+            </span>
+          </div>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {Object.values(RAIL_META).map((r) => (

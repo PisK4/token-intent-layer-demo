@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 import clsx from "clsx";
-import { CHAINS, TOKENS } from "@/lib/data-loader";
+import { CHAINS, TOKENS, isWithdrawable } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
-import type { Token, Chain } from "@/lib/types";
+import type { Token, Chain, Direction } from "@/lib/types";
 
 interface Props {
+  direction: Direction;
   selectedChainId: string;
   selectedTokenSymbol: string;
   onChainChange: (id: string) => void;
@@ -22,6 +23,7 @@ function commitmentPill(token: Token) {
 }
 
 export default function TokenChainSelector({
+  direction,
   selectedChainId,
   selectedTokenSymbol,
   onChainChange,
@@ -31,13 +33,29 @@ export default function TokenChainSelector({
   const [tokenOpen, setTokenOpen] = useState(false);
   const [tokenQuery, setTokenQuery] = useState("");
 
+  const isWithdraw = direction === "withdraw";
+
+  const labels = isWithdraw
+    ? {
+        heading: "Select Target",
+        chainLabel: "Target Chain",
+        tokenLabel: "Withdraw Token",
+        ledgerLabel: "From EdgeX Balance",
+      }
+    : {
+        heading: "Select Source",
+        chainLabel: "Source Chain",
+        tokenLabel: "Source Token",
+        ledgerLabel: "Final Ledger",
+      };
+
   const selectedChain = CHAINS.find((c) => c.id === selectedChainId)!;
   const selectedToken = TOKENS.find((t) => t.symbol === selectedTokenSymbol)!;
 
-  const tokensOnChain = useMemo(
-    () => TOKENS.filter((t) => t.chains.includes(selectedChainId)),
-    [selectedChainId],
-  );
+  const tokensOnChain = useMemo(() => {
+    const base = TOKENS.filter((t) => t.chains.includes(selectedChainId));
+    return isWithdraw ? base.filter(isWithdrawable) : base;
+  }, [selectedChainId, isWithdraw]);
 
   const filteredTokens = useMemo(() => {
     const q = tokenQuery.trim().toLowerCase();
@@ -51,7 +69,9 @@ export default function TokenChainSelector({
 
   const handleChainSelect = (c: Chain) => {
     onChainChange(c.id);
-    const compatibleTokens = TOKENS.filter((t) => t.chains.includes(c.id));
+    const compatibleTokens = TOKENS.filter((t) => t.chains.includes(c.id)).filter(
+      (t) => (isWithdraw ? isWithdrawable(t) : true),
+    );
     if (compatibleTokens.length > 0) {
       const currentStillValid = compatibleTokens.find(
         (t) => t.symbol === selectedTokenSymbol,
@@ -68,13 +88,13 @@ export default function TokenChainSelector({
     <div className="glass-card p-5">
       <h2 className="mb-4 flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-wider text-muted">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-        Select Source
+        {labels.heading}
       </h2>
 
       <div className="space-y-4">
         <div className="relative">
           <label className="mb-1.5 block text-xs font-medium text-muted">
-            Source Chain
+            {labels.chainLabel}
           </label>
           <button
             onClick={() => {
@@ -133,7 +153,7 @@ export default function TokenChainSelector({
 
         <div className="relative">
           <label className="mb-1.5 block text-xs font-medium text-muted">
-            Source Token
+            {labels.tokenLabel}
           </label>
           <button
             onClick={() => {
@@ -191,7 +211,9 @@ export default function TokenChainSelector({
               <div className="max-h-64 overflow-auto scrollbar-thin">
                 {filteredTokens.length === 0 ? (
                   <div className="px-3 py-6 text-center text-xs text-muted">
-                    该链上暂无支持的 Token
+                    {isWithdraw
+                      ? "该链上暂无可提现的 Token"
+                      : "该链上暂无支持的 Token"}
                   </div>
                 ) : (
                   filteredTokens.map((t) => {
@@ -252,7 +274,7 @@ export default function TokenChainSelector({
             <span className={`pill ${pill.cls}`}>{pill.label}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted">Final Ledger</span>
+            <span className="text-muted">{labels.ledgerLabel}</span>
             <span className="font-mono text-foreground">
               {selectedToken.finalAccount === "self"
                 ? selectedToken.symbol
