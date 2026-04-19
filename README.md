@@ -67,24 +67,27 @@ vercel --cwd repos/edgex-intent-layer-demo
 
 ```
 edgex-intent-layer-demo/
+├── data/                      # [META DATA] 单一事实源（JSON）
+│   ├── chains.json            # 11 条链
+│   ├── tokens.json            # 15 个 Token
+│   ├── rails.json             # 6 条 Protocol Rail
+│   └── README.md              # 数据扩展指南
 ├── app/
-│   ├── layout.tsx         # 字体与全局布局
-│   ├── page.tsx           # 主页面（左右双区布局）
-│   └── globals.css        # Tailwind + Glassmorphism
+│   ├── layout.tsx             # 字体与全局布局
+│   ├── page.tsx               # 主页面（左右双区布局）
+│   └── globals.css            # Tailwind + Glassmorphism
 ├── components/
-│   ├── Header.tsx         # 顶部导航 + Deposit/Withdraw Toggle
+│   ├── Header.tsx             # 顶部导航 + Deposit/Withdraw Toggle
 │   ├── TokenChainSelector.tsx
-│   ├── SwapInterface.tsx  # Swap 框（展示型）
-│   ├── SankeyDiagram.tsx  # ECharts Sankey
-│   └── PathDetailCard.tsx # 路径步骤明细
+│   ├── SwapInterface.tsx      # Swap 框（展示型）
+│   ├── SankeyDiagram.tsx      # ECharts Sankey
+│   └── PathDetailCard.tsx     # 路径步骤明细
 ├── lib/
-│   ├── types.ts
-│   ├── route-planner.ts   # Token+Chain+Direction -> RoutePlan
-│   └── data/
-│       ├── chains.ts      # 11 条链
-│       ├── tokens.ts      # 15 个 token + 7 类 asset classification
-│       ├── rails.ts       # 6 条 protocol rail 元信息
-│       └── sankey-data.ts # 动态生成 Sankey nodes/links
+│   ├── types.ts               # 全部类型定义
+│   ├── data-loader.ts         # 加载 data/*.json + 类型断言 + dev 校验
+│   ├── asset-class-meta.ts    # 7 类资产分类的样式元信息
+│   ├── sankey-data.ts         # 派生：Sankey nodes/links
+│   └── route-planner.ts       # 派生：(token, chain, direction) → RoutePlan
 ├── tailwind.config.ts
 ├── tsconfig.json
 └── vercel.json
@@ -92,10 +95,13 @@ edgex-intent-layer-demo/
 
 ## 扩展点
 
-- 新增 Chain：编辑 `lib/data/chains.ts`
-- 新增 Token：编辑 `lib/data/tokens.ts`
-- 新增 Rail：编辑 `lib/data/rails.ts` + `lib/route-planner.ts` 的 switch 分支
-- 调整 Sankey 层级或权重：编辑 `lib/data/sankey-data.ts` 的 `buildSankeyData`
+- 新增 Chain：编辑 `data/chains.json`
+- 新增 Token：编辑 `data/tokens.json`
+- 新增 Rail：编辑 `data/rails.json` + `lib/types.ts` 的 `Rail` union + `lib/route-planner.ts` 的 switch 分支
+- 调整资产分类颜色/标签：编辑 `lib/asset-class-meta.ts`
+- 调整 Sankey 层级或权重：编辑 `lib/sankey-data.ts` 的 `buildSankeyData`
+
+详细扩展说明见 `data/README.md`。
 
 ## 设计参考
 

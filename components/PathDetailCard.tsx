@@ -2,8 +2,8 @@
 
 import { CircleCheck, CircleAlert, ArrowRight, Route } from "lucide-react";
 import clsx from "clsx";
-import { RAIL_META } from "@/lib/data/rails";
-import { ASSET_CLASS_META } from "@/lib/data/tokens";
+import { RAIL_META } from "@/lib/data-loader";
+import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
 import type { RoutePlan } from "@/lib/types";
 
 interface Props {

@@ -2,10 +2,9 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
-import { buildSankeyData } from "@/lib/data/sankey-data";
-import { TOKEN_MAP, ASSET_CLASS_META } from "@/lib/data/tokens";
-import { CHAIN_MAP } from "@/lib/data/chains";
-import { RAIL_META } from "@/lib/data/rails";
+import { buildSankeyData } from "@/lib/sankey-data";
+import { TOKEN_MAP, CHAIN_MAP, RAIL_META } from "@/lib/data-loader";
+import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
 import type { Direction } from "@/lib/types";
 
 const ReactECharts = dynamic(() => import("echarts-for-react"), {

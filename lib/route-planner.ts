@@ -1,6 +1,5 @@
-import { CHAIN_MAP } from "./data/chains";
-import { TOKEN_MAP, ASSET_CLASS_META } from "./data/tokens";
-import { RAIL_META } from "./data/rails";
+import { CHAIN_MAP, TOKEN_MAP, RAIL_META } from "./data-loader";
+import { ASSET_CLASS_META } from "./asset-class-meta";
 import type { Direction, PathStep, Rail, RoutePlan } from "./types";
 
 export function planRoute(

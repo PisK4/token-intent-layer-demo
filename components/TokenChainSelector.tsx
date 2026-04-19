@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 import clsx from "clsx";
-import { CHAINS } from "@/lib/data/chains";
-import { TOKENS, ASSET_CLASS_META } from "@/lib/data/tokens";
+import { CHAINS, TOKENS } from "@/lib/data-loader";
+import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
 import type { Token, Chain } from "@/lib/types";
 
 interface Props {

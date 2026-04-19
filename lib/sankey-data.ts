@@ -1,7 +1,6 @@
-import { CHAINS } from "./chains";
-import { TOKENS, ASSET_CLASS_META } from "./tokens";
-import { RAIL_META } from "./rails";
-import type { Direction, SankeyLink, SankeyNode, Token } from "../types";
+import { CHAINS, TOKENS, RAIL_META } from "./data-loader";
+import { ASSET_CLASS_META } from "./asset-class-meta";
+import type { Direction, SankeyLink, SankeyNode, Token } from "./types";
 
 interface SankeyDataset {
   nodes: SankeyNode[];

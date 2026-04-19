@@ -1,0 +1,32 @@
+{
+  "cctp": {
+    "label": "CCTP",
+    "color": "#3B82F6",
+    "description": "Circle Cross-Chain Transfer Protocol — USDC canonical settlement"
+  },
+  "vault": {
+    "label": "EdgeX Vault",
+    "color": "#22C55E",
+    "description": "源链原生金库合约，链下 Server 监听记账"
+  },
+  "intent-layer": {
+    "label": "Intent Layer",
+    "color": "#A855F7",
+    "description": "UniswapX / CoW / 1inch 聚合，完成换汇与流动性补足"
+  },
+  "layerzero": {
+    "label": "LayerZero",
+    "color": "#F59E0B",
+    "description": "OFT / OApp omnichain standard"
+  },
+  "wormhole": {
+    "label": "Wormhole",
+    "color": "#F97316",
+    "description": "Solana / Aptos / Sui 异构 VM 互通"
+  },
+  "direct": {
+    "label": "Direct Entry",
+    "color": "#14B8A6",
+    "description": "源链 Vault 直接入金（不跨链）"
+  }
+}

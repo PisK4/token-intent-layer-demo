@@ -3,9 +3,8 @@
 import { useMemo, useState } from "react";
 import { ArrowDown, Sparkles, Info } from "lucide-react";
 import clsx from "clsx";
-import { TOKEN_MAP, ASSET_CLASS_META } from "@/lib/data/tokens";
-import { CHAIN_MAP } from "@/lib/data/chains";
-import { RAIL_META } from "@/lib/data/rails";
+import { TOKEN_MAP, CHAIN_MAP, RAIL_META } from "@/lib/data-loader";
+import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
 import type { Direction } from "@/lib/types";
 
 interface Props {
