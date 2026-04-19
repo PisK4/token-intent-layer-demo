@@ -1,0 +1,206 @@
+import { CHAIN_MAP } from "./data/chains";
+import { TOKEN_MAP, ASSET_CLASS_META } from "./data/tokens";
+import { RAIL_META } from "./data/rails";
+import type { Direction, PathStep, Rail, RoutePlan } from "./types";
+
+export function planRoute(
+  tokenSymbol: string,
+  chainId: string,
+  direction: Direction,
+  stockSufficient: boolean,
+): RoutePlan | null {
+  const token = TOKEN_MAP[tokenSymbol];
+  const chain = CHAIN_MAP[chainId];
+  if (!token || !chain) return null;
+  if (!token.chains.includes(chainId)) return null;
+
+  const rail: Rail = token.rails[0];
+  const assetMeta = ASSET_CLASS_META[token.assetClass];
+  const railMeta = RAIL_META[rail];
+
+  const steps: PathStep[] = [];
+  let targetAccount = "";
+  let note: string | undefined;
+
+  if (direction === "deposit") {
+    steps.push({
+      label: `用户在 ${chain.name} 发起充值`,
+      detail: `资产：${token.symbol} · 分类：${assetMeta.label}`,
+    });
+
+    switch (rail) {
+      case "cctp":
+        steps.push({
+          label: "CCTP 规范跨链",
+          protocol: "Circle CCTP",
+          detail: "Burn on source → Attestation → Mint on Edge Chain",
+        });
+        targetAccount = "USDC @ EdgeX";
+        break;
+      case "vault":
+        steps.push({
+          label: "源链 Vault 合约存入",
+          protocol: "EdgeX Vault",
+          detail: "链下 Server 监听 Deposit 事件并入账",
+        });
+        targetAccount =
+          token.finalAccount === "ETH"
+            ? "ETH @ EdgeX"
+            : `${token.symbol} @ EdgeX`;
+        break;
+      case "intent-layer":
+        steps.push({
+          label: "Intent Layer 归一化换汇",
+          protocol: "UniswapX / CoW / 1inch",
+          detail:
+            token.finalAccount === "USDC"
+              ? `源链 swap ${token.symbol} → USDC`
+              : `源链 swap ${token.symbol} → ETH`,
+        });
+        steps.push({
+          label: token.finalAccount === "USDC" ? "CCTP 交付" : "Vault 交付",
+          protocol: token.finalAccount === "USDC" ? "CCTP" : "Vault",
+          detail:
+            token.finalAccount === "USDC"
+              ? "USDC 跨链到 Edge Chain"
+              : "ETH 入 Vault 合约",
+        });
+        targetAccount =
+          token.finalAccount === "USDC" ? "USDC @ EdgeX" : "ETH @ EdgeX";
+        break;
+      case "layerzero":
+        steps.push({
+          label: "LayerZero OFT 跨链",
+          protocol: "LayerZero",
+          detail: "Omnichain 标准互通，保留原 Token 语义",
+        });
+        targetAccount = `${token.symbol} @ EdgeX`;
+        break;
+      case "wormhole":
+        steps.push({
+          label: "Wormhole 桥接到 EVM",
+          protocol: "Wormhole",
+          detail: `${token.symbol}@${chain.name} → wrapped on EVM chain`,
+        });
+        steps.push({
+          label: "EVM 链 Vault 存入",
+          protocol: "EdgeX Vault",
+          detail: "链下 Server 监听 Deposit 事件并入账",
+        });
+        targetAccount = `${token.symbol} @ EdgeX`;
+        break;
+      case "direct":
+        steps.push({
+          label: "源链 Vault 直接存入",
+          protocol: "EdgeX Vault (源链)",
+          detail: "源链闭环，仅源链入金，将来仅源链提现",
+        });
+        targetAccount = `${token.symbol} @ EdgeX`;
+        note = "Source-only 资产：入金链 = 提现链，库存 = 入金累积";
+        break;
+    }
+
+    steps.push({
+      label: "EdgeX Ledger 入账",
+      detail: `交易与风控以 ${targetAccount} 作为可用余额`,
+    });
+  } else {
+    // Withdraw
+    targetAccount = `${token.symbol} @ ${chain.name}`;
+    steps.push({
+      label: "用户发起提现",
+      detail: `目标：${targetAccount}`,
+    });
+
+    if (token.commitment === "source-only") {
+      steps.push({
+        label: "源链 Vault 直接交付原 Token",
+        protocol: "EdgeX Vault (源链)",
+        detail: "库存 = 历史入金累积，无 solver 补位",
+        status: stockSufficient ? "normal" : "fallback",
+      });
+      if (!stockSufficient) {
+        note = "Source-only 资产库存不足时无法兜底，此路径不可用。";
+      }
+    } else if (rail === "cctp") {
+      steps.push({
+        label: "CCTP canonical 交付",
+        protocol: "Circle CCTP",
+        detail: "USDC 规范跨链到目标链",
+        status: stockSufficient ? "normal" : "fallback",
+      });
+      if (!stockSufficient) {
+        note = "库存极端不足时才由 solver 兜底，此处保留 canonical 承诺";
+      }
+    } else if (rail === "vault") {
+      if (stockSufficient) {
+        steps.push({
+          label: "目标链 Vault 直接交付",
+          protocol: "EdgeX Vault",
+          detail: `${token.symbol} 同资产交付`,
+          status: "normal",
+        });
+      } else {
+        steps.push({
+          label: "Intent Layer Fallback",
+          protocol: "CoW / UniswapX / 1inch",
+          detail: `solver 在 ${chain.name} 买入 ${token.symbol} 后交付用户`,
+          status: "fallback",
+        });
+        note = "库存不足时切换到 solver route，用户仍收到原资产";
+      }
+    } else if (rail === "layerzero") {
+      if (stockSufficient) {
+        steps.push({
+          label: "目标链 Vault 直接交付",
+          protocol: "EdgeX Vault",
+          detail: `${token.symbol} 原 Token 交付`,
+          status: "normal",
+        });
+      } else {
+        steps.push({
+          label: "OFT Rebalancing 再平衡",
+          protocol: "LayerZero OFT",
+          detail: "零价格冲击跨链补足库存后交付",
+          status: "fallback",
+        });
+        note = "OFT 再平衡优先，solver DEX 降级补位";
+      }
+    } else if (rail === "intent-layer") {
+      steps.push({
+        label: "Intent Layer solver 交付",
+        protocol: "CoW / UniswapX / 1inch",
+        detail:
+          token.finalAccount === "USDC" || token.finalAccount === "ETH"
+            ? "按核心资产路径交付"
+            : `solver 在 ${chain.name} 买入原 Token 交付`,
+        status: stockSufficient ? "normal" : "fallback",
+      });
+    } else if (rail === "wormhole") {
+      steps.push({
+        label: "EVM → Solana/Aptos/Sui 桥接",
+        protocol: "Wormhole",
+        detail: "经 EVM 链 Vault 解押后 Wormhole 桥接回目标链",
+        status: stockSufficient ? "normal" : "fallback",
+      });
+    } else {
+      steps.push({
+        label: "Direct 交付",
+        protocol: railMeta.label,
+        detail: "原资产原链交付",
+        status: "normal",
+      });
+    }
+  }
+
+  return {
+    direction,
+    sourceChain: chain,
+    sourceToken: token,
+    targetAccount,
+    rail,
+    steps,
+    commitment: token.commitment,
+    note,
+  };
+}

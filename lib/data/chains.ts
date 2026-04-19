@@ -1,0 +1,17 @@
+import type { Chain } from "../types";
+
+export const CHAINS: Chain[] = [
+  { id: "ethereum", name: "Ethereum", color: "#627EEA", family: "evm", shortCode: "ETH" },
+  { id: "arbitrum", name: "Arbitrum", color: "#28A0F0", family: "evm", shortCode: "ARB" },
+  { id: "base", name: "Base", color: "#0052FF", family: "evm", shortCode: "BASE" },
+  { id: "optimism", name: "Optimism", color: "#FF0420", family: "evm", shortCode: "OP" },
+  { id: "polygon", name: "Polygon", color: "#8247E5", family: "evm", shortCode: "POL" },
+  { id: "bsc", name: "BNB Chain", color: "#F3BA2F", family: "evm", shortCode: "BSC" },
+  { id: "avalanche", name: "Avalanche", color: "#E84142", family: "evm", shortCode: "AVAX" },
+  { id: "linea", name: "Linea", color: "#61DFFF", family: "evm", shortCode: "LINEA" },
+  { id: "solana", name: "Solana", color: "#9945FF", family: "non-evm", shortCode: "SOL" },
+  { id: "aptos", name: "Aptos", color: "#06B6D4", family: "non-evm", shortCode: "APT" },
+  { id: "sui", name: "Sui", color: "#4DA2FF", family: "non-evm", shortCode: "SUI" },
+];
+
+export const CHAIN_MAP = Object.fromEntries(CHAINS.map((c) => [c.id, c]));
