@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { TOKEN_MAP, CHAIN_MAP, RAIL_META } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
 import type { Direction } from "@/lib/types";
+import { TokenIcon } from "./AssetIcon";
 
 interface Props {
   direction: Direction;
@@ -198,12 +199,12 @@ export default function SwapInterface({
               className="flex shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-medium"
               style={{ color: assetMeta.color }}
             >
-              <span
-                className="flex h-5 w-5 items-center justify-center rounded-full font-mono text-[9px] font-bold"
-                style={{ backgroundColor: assetMeta.color + "30" }}
-              >
-                {token.symbol.slice(0, 2)}
-              </span>
+              <TokenIcon
+                logoUrl={token.logoUrl}
+                symbol={token.symbol}
+                tintColor={assetMeta.color}
+                size={20}
+              />
               <span>{token.symbol}</span>
             </div>
           </div>
@@ -232,12 +233,21 @@ export default function SwapInterface({
             <span className="w-full font-display text-3xl font-bold text-foreground">
               {targetAmount}
             </span>
-            <div className="flex shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-accent/10 px-3 py-1.5 font-medium text-accent">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20 font-mono text-[9px] font-bold">
-                {targetLabel.split(" @ ")[0].slice(0, 2)}
-              </span>
-              <span>{targetLabel.split(" @ ")[0]}</span>
-            </div>
+            {(() => {
+              const targetSymbol = targetLabel.split(" @ ")[0];
+              const targetTok = TOKEN_MAP[targetSymbol];
+              return (
+                <div className="flex shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-accent/10 px-3 py-1.5 font-medium text-accent">
+                  <TokenIcon
+                    logoUrl={targetTok?.logoUrl}
+                    symbol={targetSymbol}
+                    tintColor="#22C55E"
+                    size={20}
+                  />
+                  <span>{targetSymbol}</span>
+                </div>
+              );
+            })()}
           </div>
           <p className="mt-2 text-[11px] text-muted">{targetLabel}</p>
           {yieldPremium !== undefined && (

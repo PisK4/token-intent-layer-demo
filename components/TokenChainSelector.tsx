@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { CHAINS, TOKENS, isWithdrawable } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
 import type { Token, Chain, Direction } from "@/lib/types";
+import { ChainIcon, TokenIcon } from "./AssetIcon";
 
 interface Props {
   direction: Direction;
@@ -105,10 +106,11 @@ export default function TokenChainSelector({
             aria-expanded={chainOpen}
           >
             <span className="flex items-center gap-2.5">
-              <span
-                className="inline-block h-5 w-5 rounded-full border border-white/20"
-                style={{ backgroundColor: selectedChain.color }}
-                aria-hidden
+              <ChainIcon
+                logoUrl={selectedChain.logoUrl}
+                fallbackLabel={selectedChain.shortCode}
+                fallbackColor={selectedChain.color}
+                size={20}
               />
               <span className="font-medium">{selectedChain.name}</span>
               <span className="font-mono text-xs text-muted">
@@ -135,10 +137,11 @@ export default function TokenChainSelector({
                   )}
                 >
                   <span className="flex items-center gap-2">
-                    <span
-                      className="inline-block h-4 w-4 rounded-full border border-white/20"
-                      style={{ backgroundColor: c.color }}
-                      aria-hidden
+                    <ChainIcon
+                      logoUrl={c.logoUrl}
+                      fallbackLabel={c.shortCode}
+                      fallbackColor={c.color}
+                      size={16}
                     />
                     <span>{c.name}</span>
                   </span>
@@ -165,16 +168,12 @@ export default function TokenChainSelector({
             aria-expanded={tokenOpen}
           >
             <span className="flex items-center gap-2.5">
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 font-mono text-[10px] font-bold"
-                style={{
-                  backgroundColor: assetMeta.color + "30",
-                  color: assetMeta.color,
-                }}
-                aria-hidden
-              >
-                {selectedToken.symbol.slice(0, 2)}
-              </span>
+              <TokenIcon
+                logoUrl={selectedToken.logoUrl}
+                symbol={selectedToken.symbol}
+                tintColor={assetMeta.color}
+                size={24}
+              />
               <span className="font-medium">{selectedToken.symbol}</span>
               <span className="text-xs text-muted">{selectedToken.name}</span>
             </span>
@@ -232,16 +231,12 @@ export default function TokenChainSelector({
                         )}
                       >
                         <span className="flex items-center gap-2">
-                          <span
-                            className="flex h-5 w-5 items-center justify-center rounded-full font-mono text-[9px] font-bold"
-                            style={{
-                              backgroundColor: meta.color + "30",
-                              color: meta.color,
-                            }}
-                            aria-hidden
-                          >
-                            {t.symbol.slice(0, 2)}
-                          </span>
+                          <TokenIcon
+                            logoUrl={t.logoUrl}
+                            symbol={t.symbol}
+                            tintColor={meta.color}
+                            size={20}
+                          />
                           <span className="font-medium text-sm">{t.symbol}</span>
                           <span className="text-[11px] text-muted">
                             {t.name}

@@ -96,6 +96,7 @@ export default function BubbleUniverse({
           finalAccount:
             t.finalAccount === "self" ? t.symbol : t.finalAccount,
           description: t.description,
+          logoUrl: t.logoUrl ?? "",
         },
       };
     });
@@ -121,6 +122,7 @@ export default function BubbleUniverse({
               commitment: string;
               finalAccount: string;
               description: string;
+              logoUrl: string;
             };
           };
         }) => {
@@ -128,12 +130,20 @@ export default function BubbleUniverse({
             return params.name ?? "";
           }
           const m = params.data.tokenMeta;
+          const logoImg = m.logoUrl
+            ? `<img src="${m.logoUrl}" alt="" style="width:28px;height:28px;border-radius:9999px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);object-fit:cover;flex-shrink:0" />`
+            : `<span style="width:28px;height:28px;border-radius:9999px;background:${m.assetColor}30;color:${m.assetColor};display:inline-flex;align-items:center;justify-content:center;font-family:monospace;font-size:10px;font-weight:700;flex-shrink:0">${(params.name ?? "").slice(0, 2)}</span>`;
           return `
-            <div style="font-weight:700;font-size:13px;color:${m.assetColor}">${params.name} <span style="color:#94A3B8;font-weight:400">${m.name}</span></div>
-            <div style="margin-top:6px;color:#94A3B8;font-size:11px">${m.assetClassLabel} · ${m.commitment}</div>
-            <div style="margin-top:4px;color:#CBD5E1;font-size:11px">Final Ledger: <span style="color:#22C55E;font-family:monospace">${m.finalAccount}</span></div>
-            <div style="margin-top:4px;color:#CBD5E1;font-size:11px">Chains: ${m.chains}</div>
-            <div style="margin-top:6px;color:#94A3B8;font-size:11px;max-width:280px;line-height:1.4">${m.description}</div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              ${logoImg}
+              <div>
+                <div style="font-weight:700;font-size:13px;color:${m.assetColor}">${params.name} <span style="color:#94A3B8;font-weight:400">${m.name}</span></div>
+                <div style="margin-top:6px;color:#94A3B8;font-size:11px">${m.assetClassLabel} · ${m.commitment}</div>
+                <div style="margin-top:4px;color:#CBD5E1;font-size:11px">Final Ledger: <span style="color:#22C55E;font-family:monospace">${m.finalAccount}</span></div>
+                <div style="margin-top:4px;color:#CBD5E1;font-size:11px;max-width:280px;word-break:break-word">Chains: ${m.chains}</div>
+                <div style="margin-top:6px;color:#94A3B8;font-size:11px;max-width:280px;line-height:1.4">${m.description}</div>
+              </div>
+            </div>
           `;
         },
       },

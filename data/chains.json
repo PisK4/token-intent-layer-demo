@@ -1,21 +1,154 @@
 [
-  { "id": "ethereum", "name": "Ethereum", "color": "#627EEA", "family": "evm", "shortCode": "ETH" },
-  { "id": "arbitrum", "name": "Arbitrum", "color": "#28A0F0", "family": "evm", "shortCode": "ARB" },
-  { "id": "base", "name": "Base", "color": "#0052FF", "family": "evm", "shortCode": "BASE" },
-  { "id": "optimism", "name": "Optimism", "color": "#FF0420", "family": "evm", "shortCode": "OP" },
-  { "id": "polygon", "name": "Polygon", "color": "#8247E5", "family": "evm", "shortCode": "POL" },
-  { "id": "bsc", "name": "BNB Chain", "color": "#F3BA2F", "family": "evm", "shortCode": "BSC" },
-  { "id": "avalanche", "name": "Avalanche", "color": "#E84142", "family": "evm", "shortCode": "AVAX" },
-  { "id": "linea", "name": "Linea", "color": "#61DFFF", "family": "evm", "shortCode": "LINEA" },
-  { "id": "edge", "name": "EDGE", "color": "#00D4FF", "family": "evm", "shortCode": "EDGE" },
-  { "id": "unichain", "name": "Unichain", "color": "#FC72FF", "family": "evm", "shortCode": "UNIC" },
-  { "id": "world-chain", "name": "World Chain", "color": "#4940E0", "family": "evm", "shortCode": "WLD" },
-  { "id": "ink", "name": "Ink", "color": "#542DDB", "family": "evm", "shortCode": "INK" },
-  { "id": "monad", "name": "Monad", "color": "#836EF9", "family": "evm", "shortCode": "MON" },
-  { "id": "sei", "name": "Sei", "color": "#9B1C2E", "family": "evm", "shortCode": "SEI" },
-  { "id": "scroll", "name": "Scroll", "color": "#FFB47A", "family": "evm", "shortCode": "SCR" },
-  { "id": "hyperevm", "name": "HyperEVM", "color": "#B0FF61", "family": "evm", "shortCode": "HYPER" },
-  { "id": "solana", "name": "Solana", "color": "#9945FF", "family": "non-evm", "shortCode": "SOL" },
-  { "id": "aptos", "name": "Aptos", "color": "#06B6D4", "family": "non-evm", "shortCode": "APT" },
-  { "id": "sui", "name": "Sui", "color": "#4DA2FF", "family": "non-evm", "shortCode": "SUI" }
+  {
+    "id": "ethereum",
+    "name": "Ethereum",
+    "color": "#627EEA",
+    "family": "evm",
+    "shortCode": "ETH",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/ethereum.svg"
+  },
+  {
+    "id": "arbitrum",
+    "name": "Arbitrum",
+    "color": "#28A0F0",
+    "family": "evm",
+    "shortCode": "ARB",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/arbitrum.svg"
+  },
+  {
+    "id": "base",
+    "name": "Base",
+    "color": "#0052FF",
+    "family": "evm",
+    "shortCode": "BASE",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/base.svg"
+  },
+  {
+    "id": "optimism",
+    "name": "Optimism",
+    "color": "#FF0420",
+    "family": "evm",
+    "shortCode": "OP",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/optimism.svg"
+  },
+  {
+    "id": "polygon",
+    "name": "Polygon",
+    "color": "#8247E5",
+    "family": "evm",
+    "shortCode": "POL",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg"
+  },
+  {
+    "id": "bsc",
+    "name": "BNB Chain",
+    "color": "#F3BA2F",
+    "family": "evm",
+    "shortCode": "BSC",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg"
+  },
+  {
+    "id": "avalanche",
+    "name": "Avalanche",
+    "color": "#E84142",
+    "family": "evm",
+    "shortCode": "AVAX",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/avalanche.svg"
+  },
+  {
+    "id": "linea",
+    "name": "Linea",
+    "color": "#61DFFF",
+    "family": "evm",
+    "shortCode": "LINEA",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/linea.svg"
+  },
+  {
+    "id": "edge",
+    "name": "EDGE",
+    "color": "#00D4FF",
+    "family": "evm",
+    "shortCode": "EDGE",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/ethereum.svg"
+  },
+  {
+    "id": "unichain",
+    "name": "Unichain",
+    "color": "#FC72FF",
+    "family": "evm",
+    "shortCode": "UNIC",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/unichain.svg"
+  },
+  {
+    "id": "world-chain",
+    "name": "World Chain",
+    "color": "#4940E0",
+    "family": "evm",
+    "shortCode": "WLD",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/world.svg"
+  },
+  {
+    "id": "ink",
+    "name": "Ink",
+    "color": "#542DDB",
+    "family": "evm",
+    "shortCode": "INK",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/ink.svg"
+  },
+  {
+    "id": "monad",
+    "name": "Monad",
+    "color": "#836EF9",
+    "family": "evm",
+    "shortCode": "MON",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/monad.svg"
+  },
+  {
+    "id": "sei",
+    "name": "Sei",
+    "color": "#9B1C2E",
+    "family": "evm",
+    "shortCode": "SEI",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/sei.svg"
+  },
+  {
+    "id": "scroll",
+    "name": "Scroll",
+    "color": "#FFB47A",
+    "family": "evm",
+    "shortCode": "SCR",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/scroll.svg"
+  },
+  {
+    "id": "hyperevm",
+    "name": "HyperEVM",
+    "color": "#B0FF61",
+    "family": "evm",
+    "shortCode": "HYPER",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/hyperevm.svg"
+  },
+  {
+    "id": "solana",
+    "name": "Solana",
+    "color": "#9945FF",
+    "family": "non-evm",
+    "shortCode": "SOL",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/solana.svg"
+  },
+  {
+    "id": "aptos",
+    "name": "Aptos",
+    "color": "#06B6D4",
+    "family": "non-evm",
+    "shortCode": "APT",
+    "logoUrl": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/aptos/info/logo.png"
+  },
+  {
+    "id": "sui",
+    "name": "Sui",
+    "color": "#4DA2FF",
+    "family": "non-evm",
+    "shortCode": "SUI",
+    "logoUrl": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/sui.svg"
+  }
 ]

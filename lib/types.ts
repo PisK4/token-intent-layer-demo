@@ -25,6 +25,8 @@ export interface Chain {
   color: string;
   family: "evm" | "non-evm";
   shortCode: string;
+  /** Remote logo URL (LI.FI / Trust Wallet / manual fallback). Optional. */
+  logoUrl?: string;
 }
 
 export interface Token {
@@ -36,6 +38,8 @@ export interface Token {
   finalAccount: "USDC" | "ETH" | "SOL" | "self";
   rails: Rail[];
   description: string;
+  /** Remote logo URL (LI.FI / Trust Wallet / manual fallback). Optional. */
+  logoUrl?: string;
 }
 
 export interface SankeyNode {

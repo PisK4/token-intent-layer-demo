@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { RAIL_META } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
 import type { RoutePlan } from "@/lib/types";
+import { ChainIcon, TokenIcon } from "./AssetIcon";
 
 interface Props {
   plan: RoutePlan | null;
@@ -50,15 +51,25 @@ export default function PathDetailCard({ plan }: Props) {
 
       <div className="mb-4 flex items-center gap-2 text-sm">
         <div className="flex items-center gap-1.5">
-          <span
-            className="inline-block h-2 w-2 rounded-full"
-            style={{ backgroundColor: plan.sourceChain.color }}
+          <ChainIcon
+            logoUrl={plan.sourceChain.logoUrl}
+            fallbackLabel={plan.sourceChain.shortCode}
+            fallbackColor={plan.sourceChain.color}
+            size={16}
           />
           <span className="font-medium">{plan.sourceChain.name}</span>
         </div>
         <ArrowRight className="h-3.5 w-3.5 text-muted" />
-        <span className="font-mono text-xs" style={{ color: assetMeta.color }}>
-          {plan.sourceToken.symbol}
+        <span className="flex items-center gap-1.5">
+          <TokenIcon
+            logoUrl={plan.sourceToken.logoUrl}
+            symbol={plan.sourceToken.symbol}
+            tintColor={assetMeta.color}
+            size={16}
+          />
+          <span className="font-mono text-xs" style={{ color: assetMeta.color }}>
+            {plan.sourceToken.symbol}
+          </span>
         </span>
         <ArrowRight className="h-3.5 w-3.5 text-muted" />
         <span className="font-mono text-xs text-accent">
