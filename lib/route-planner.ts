@@ -48,24 +48,48 @@ export function planRoute(
             : `${token.symbol} @ EdgeX`;
         break;
       case "intent-layer":
-        steps.push({
-          label: "Intent Layer 归一化换汇",
-          protocol: "UniswapX / CoW / 1inch",
-          detail:
-            token.finalAccount === "USDC"
-              ? `源链 swap ${token.symbol} → USDC`
-              : `源链 swap ${token.symbol} → ETH`,
-        });
-        steps.push({
-          label: token.finalAccount === "USDC" ? "CCTP 交付" : "Vault 交付",
-          protocol: token.finalAccount === "USDC" ? "CCTP" : "Vault",
-          detail:
-            token.finalAccount === "USDC"
-              ? "USDC 跨链到 Edge Chain"
-              : "ETH 入 Vault 合约",
-        });
-        targetAccount =
-          token.finalAccount === "USDC" ? "USDC @ EdgeX" : "ETH @ EdgeX";
+        if (token.finalAccount === "SOL") {
+          steps.push({
+            label: "Intent Layer 归一化换汇",
+            protocol: "Jupiter",
+            detail: `源链 swap ${token.symbol} → SOL`,
+          });
+          steps.push({
+            label: "Wormhole 桥接到 EVM",
+            protocol: "Wormhole",
+            detail: `SOL@${chain.name} → wrapped on EVM chain`,
+          });
+          steps.push({
+            label: "EVM 链 Vault 存入",
+            protocol: "EdgeX Vault",
+            detail: "链下 Server 监听 Deposit 事件并入账",
+          });
+          targetAccount = "SOL @ EdgeX";
+        } else if (token.finalAccount === "USDC") {
+          steps.push({
+            label: "Intent Layer 归一化换汇",
+            protocol: "UniswapX / CoW / 1inch",
+            detail: `源链 swap ${token.symbol} → USDC`,
+          });
+          steps.push({
+            label: "CCTP 交付",
+            protocol: "CCTP",
+            detail: "USDC 跨链到 Edge Chain",
+          });
+          targetAccount = "USDC @ EdgeX";
+        } else {
+          steps.push({
+            label: "Intent Layer 归一化换汇",
+            protocol: "UniswapX / CoW / 1inch",
+            detail: `源链 swap ${token.symbol} → ETH`,
+          });
+          steps.push({
+            label: "Vault 交付",
+            protocol: "Vault",
+            detail: "ETH 入 Vault 合约",
+          });
+          targetAccount = "ETH @ EdgeX";
+        }
         break;
       case "layerzero":
         steps.push({
@@ -170,7 +194,9 @@ export function planRoute(
         label: "Intent Layer solver 交付",
         protocol: "CoW / UniswapX / 1inch",
         detail:
-          token.finalAccount === "USDC" || token.finalAccount === "ETH"
+          token.finalAccount === "USDC" ||
+          token.finalAccount === "ETH" ||
+          token.finalAccount === "SOL"
             ? "按核心资产路径交付"
             : `solver 在 ${chain.name} 买入原 Token 交付`,
         status: stockSufficient ? "normal" : "fallback",

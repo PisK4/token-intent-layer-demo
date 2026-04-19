@@ -53,6 +53,15 @@ const UNIT_PRICE: Record<string, number> = {
   CAKE: 2.5,
   WLD: 1.5,
   JUP: 0.8,
+  PYTH: 0.25,
+  JTO: 2.8,
+  RAY: 3.5,
+  DEEP: 0.18,
+  CETUS: 0.12,
+  jitoSOL: 210,
+  mSOL: 205,
+  BONK: 0.00003,
+  WIF: 1.8,
   MOG: 0.0000032,
 };
 
