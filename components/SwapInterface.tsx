@@ -33,11 +33,11 @@ const UNIT_PRICE: Record<string, number> = {
   APT: 10,
   SUI: 3,
   SEI: 0.35,
-  stETH: 3360,
-  wstETH: 3900,
-  weETH: 3500,
-  aUSDC: 1,
-  sUSDe: 1.05,
+  stETH: 3696,
+  wstETH: 4200,
+  weETH: 3561,
+  aUSDC: 1.08,
+  sUSDe: 1.12,
   ENA: 0.68,
   AAVE: 152,
   LINK: 18,
@@ -58,8 +58,8 @@ const UNIT_PRICE: Record<string, number> = {
   RAY: 3.5,
   DEEP: 0.18,
   CETUS: 0.12,
-  jitoSOL: 210,
-  mSOL: 205,
+  jitoSOL: 207,
+  mSOL: 200,
   BONK: 0.00003,
   WIF: 1.8,
   MOG: 0.0000032,
@@ -94,10 +94,18 @@ export default function SwapInterface({
 
   const [amount, setAmount] = useState(defaultAmount);
 
-  const { targetAmount, targetLabel, usdValue } = useMemo(() => {
+  const { targetAmount, targetLabel, usdValue, yieldPremium } = useMemo(() => {
     const numeric = Number(amount) || 0;
     const priceIn = UNIT_PRICE[token.symbol] ?? 1;
     const usd = numeric * priceIn;
+
+    const premiumFor = (baseSymbol: string): number | undefined => {
+      if (token.assetClass !== "yield") return undefined;
+      const basePrice = UNIT_PRICE[baseSymbol];
+      if (!basePrice) return undefined;
+      const ratio = priceIn / basePrice;
+      return ratio > 1.001 ? (ratio - 1) * 100 : undefined;
+    };
 
     if (direction === "deposit") {
       if (token.finalAccount === "USDC") {
@@ -105,6 +113,7 @@ export default function SwapInterface({
           targetAmount: usd.toFixed(2),
           targetLabel: "USDC @ EdgeX",
           usdValue: usd,
+          yieldPremium: premiumFor("USDC"),
         };
       }
       if (token.finalAccount === "ETH") {
@@ -113,12 +122,23 @@ export default function SwapInterface({
           targetAmount: ethOut.toFixed(4),
           targetLabel: "ETH @ EdgeX",
           usdValue: usd,
+          yieldPremium: premiumFor("ETH"),
+        };
+      }
+      if (token.finalAccount === "SOL") {
+        const solOut = usd / UNIT_PRICE.SOL;
+        return {
+          targetAmount: solOut.toFixed(3),
+          targetLabel: "SOL @ EdgeX",
+          usdValue: usd,
+          yieldPremium: premiumFor("SOL"),
         };
       }
       return {
         targetAmount: numeric.toLocaleString(),
         targetLabel: `${token.symbol} @ EdgeX`,
         usdValue: usd,
+        yieldPremium: undefined,
       };
     }
 
@@ -127,6 +147,7 @@ export default function SwapInterface({
       targetAmount: numeric.toLocaleString(),
       targetLabel: `${token.symbol} @ ${chain.name}`,
       usdValue: usd,
+      yieldPremium: undefined,
     };
   }, [amount, token, chain, direction]);
 
@@ -220,6 +241,17 @@ export default function SwapInterface({
             </div>
           </div>
           <p className="mt-2 text-[11px] text-muted">{targetLabel}</p>
+          {yieldPremium !== undefined && (
+            <div className="mt-2 flex items-center gap-1.5 rounded-lg border border-accent/20 bg-accent/5 px-2 py-1.5">
+              <Sparkles className="h-3 w-3 text-accent" />
+              <span className="text-[11px] font-medium text-accent">
+                Yield premium: +{yieldPremium.toFixed(1)}%
+              </span>
+              <span className="text-[11px] text-muted">
+                · {token.symbol} 已累积收益，归一化后获得更多 {token.finalAccount}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
