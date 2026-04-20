@@ -23,7 +23,7 @@ import { TokenIcon } from "./AssetIcon";
 const ACCENT = "#06B6D4";
 
 interface Props {
-  onNavigateToDeposit: (tokenSymbol: string, chainId: string) => void;
+  onNavigateToDeposit?: (tokenSymbol: string, chainId: string) => void;
 }
 
 function fmt(v: number, decimals = 2): string {
@@ -32,7 +32,7 @@ function fmt(v: number, decimals = 2): string {
   return `$${v.toFixed(decimals)}`;
 }
 
-export default function AskAiPanel({ onNavigateToDeposit }: Props) {
+export default function AskAiPanel(_props: Props) {
   const analysis = useMemo(
     () => analyzeWallet(mockWalletJson as WalletHolding[]),
     [],
@@ -42,6 +42,15 @@ export default function AskAiPanel({ onNavigateToDeposit }: Props) {
   const [scanned, setScanned] = useState(false);
   const [dustExpanded, setDustExpanded] = useState(true);
   const [yieldExpanded, setYieldExpanded] = useState(true);
+  const [dustFlash, setDustFlash] = useState(false);
+  const [yieldFlash, setYieldFlash] = useState(false);
+
+  const flashNotImplemented = (
+    setter: (v: boolean) => void,
+  ) => {
+    setter(true);
+    setTimeout(() => setter(false), 2500);
+  };
 
   const handleScan = () => {
     setScanning(true);
@@ -219,14 +228,19 @@ export default function AskAiPanel({ onNavigateToDeposit }: Props) {
                   })}
                 </div>
                 <button
-                  onClick={() => {
-                    const first = analysis.dustTokens[0];
-                    if (first) onNavigateToDeposit(first.symbol, first.chain);
-                  }}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-pink-500/30 bg-pink-500/10 py-2.5 text-sm font-semibold text-pink-400 transition-colors hover:bg-pink-500/20"
+                  onClick={() => flashNotImplemented(setDustFlash)}
+                  disabled={dustFlash}
+                  className={clsx(
+                    "mt-3 flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition-colors",
+                    dustFlash
+                      ? "border-white/10 bg-white/5 text-muted"
+                      : "border-pink-500/30 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20",
+                  )}
                 >
                   <Sparkles className="h-4 w-4" />
-                  Sweep All Dust → USDC / ETH
+                  {dustFlash
+                    ? "Coming Soon · 该功能尚未实现"
+                    : "Sweep All Dust → USDC / ETH"}
                 </button>
               </div>
             )}
@@ -315,14 +329,19 @@ export default function AskAiPanel({ onNavigateToDeposit }: Props) {
                   })}
                 </div>
                 <button
-                  onClick={() => {
-                    const first = analysis.yieldTokens[0];
-                    if (first) onNavigateToDeposit(first.symbol, first.chain);
-                  }}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-purple-500/30 bg-purple-500/10 py-2.5 text-sm font-semibold text-purple-400 transition-colors hover:bg-purple-500/20"
+                  onClick={() => flashNotImplemented(setYieldFlash)}
+                  disabled={yieldFlash}
+                  className={clsx(
+                    "mt-3 flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition-colors",
+                    yieldFlash
+                      ? "border-white/10 bg-white/5 text-muted"
+                      : "border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20",
+                  )}
                 >
                   <TrendingUp className="h-4 w-4" />
-                  Deposit Yield Tokens → EdgeX
+                  {yieldFlash
+                    ? "Coming Soon · 该功能尚未实现"
+                    : "Deposit Yield Tokens → EdgeX"}
                 </button>
               </div>
             )}
@@ -434,10 +453,6 @@ export default function AskAiPanel({ onNavigateToDeposit }: Props) {
                 description={`将 ${analysis.dustTokens.length} 个 Dust Token (${fmt(analysis.totalDustUsd)}) 合并归一化为 USDC / ETH — 单个不够 EdgeX $10 最小入金门槛，合并后一次性存入`}
                 detail="1inch / UniswapX / CoW 源链聚合兑换 → CCTP / Vault 入账"
                 status={analysis.dustTokens.length > 0 ? "actionable" : "done"}
-                onAction={() => {
-                  const first = analysis.dustTokens[0];
-                  if (first) onNavigateToDeposit(first.symbol, first.chain);
-                }}
               />
 
               {/* Step 2: Deposit yield */}
@@ -453,10 +468,6 @@ export default function AskAiPanel({ onNavigateToDeposit }: Props) {
                     : "源链实时汇率兑换"
                 }
                 status={analysis.yieldTokens.length > 0 ? "actionable" : "done"}
-                onAction={() => {
-                  const first = analysis.yieldTokens[0];
-                  if (first) onNavigateToDeposit(first.symbol, first.chain);
-                }}
               />
 
               {/* Step 3: Start trading */}
@@ -625,7 +636,6 @@ function ActionStep({
   description,
   detail,
   status,
-  onAction,
 }: {
   step: number;
   color: string;
@@ -634,8 +644,13 @@ function ActionStep({
   description: string;
   detail: string;
   status: "actionable" | "done" | "info";
-  onAction?: () => void;
 }) {
+  const [flash, setFlash] = useState(false);
+  const handleClick = () => {
+    setFlash(true);
+    setTimeout(() => setFlash(false), 2500);
+  };
+
   return (
     <div
       className={clsx(
@@ -671,14 +686,30 @@ function ActionStep({
             {description}
           </p>
           <p className="mt-0.5 text-[10px] text-muted">{detail}</p>
-          {status === "actionable" && onAction && (
+          {status === "actionable" && (
             <button
-              onClick={onAction}
-              className="mt-2 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors hover:bg-white/5"
-              style={{ color, border: `1px solid ${color}40` }}
+              onClick={handleClick}
+              disabled={flash}
+              className={clsx(
+                "mt-2 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors",
+                flash
+                  ? "border border-white/10 text-muted"
+                  : "hover:bg-white/5",
+              )}
+              style={
+                flash
+                  ? undefined
+                  : { color, border: `1px solid ${color}40` }
+              }
             >
-              Go to Deposit
-              <ArrowRight className="h-3 w-3" />
+              {flash ? (
+                "Coming Soon · 该功能尚未实现"
+              ) : (
+                <>
+                  Go to Deposit
+                  <ArrowRight className="h-3 w-3" />
+                </>
+              )}
             </button>
           )}
         </div>
