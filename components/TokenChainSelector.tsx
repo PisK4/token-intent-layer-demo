@@ -86,7 +86,7 @@ export default function TokenChainSelector({
   const pill = commitmentPill(selectedToken);
 
   return (
-    <div className="glass-card p-5">
+    <div className="glass-card z-30 p-5">
       <h2 className="mb-4 flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-wider text-muted">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
         {labels.heading}
@@ -126,7 +126,7 @@ export default function TokenChainSelector({
           </button>
 
           {chainOpen && (
-            <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-72 overflow-auto rounded-xl border border-white/10 bg-surface-elevated p-1 shadow-card scrollbar-thin">
+            <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-72 overflow-auto rounded-xl border border-white/10 bg-surface-elevated p-1 shadow-card scrollbar-thin">
               {CHAINS.map((c) => (
                 <button
                   key={c.id}
@@ -186,7 +186,7 @@ export default function TokenChainSelector({
           </button>
 
           {tokenOpen && (
-            <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-white/10 bg-surface-elevated p-1.5 shadow-card">
+            <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-white/10 bg-surface-elevated p-1.5 shadow-card">
               <div className="relative mb-1">
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
                 <input

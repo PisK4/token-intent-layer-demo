@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
+import HighlightBanner from "@/components/HighlightBanner";
 import TokenChainSelector from "@/components/TokenChainSelector";
 import SwapInterface from "@/components/SwapInterface";
 import SankeyDiagram from "@/components/SankeyDiagram";
@@ -61,6 +62,8 @@ export default function Home() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1440px] px-4 py-6 md:px-8 md:py-10">
       <Header direction={direction} onDirectionChange={setDirection} />
+
+      <HighlightBanner />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(360px,420px)_1fr]">
         <aside className="flex flex-col gap-5">
