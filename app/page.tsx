@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
+import FlowDirectionTabs from "@/components/FlowDirectionTabs";
 import StatsStrip from "@/components/StatsStrip";
 import HighlightBanner from "@/components/HighlightBanner";
 import WithdrawFlowStrip from "@/components/WithdrawFlowStrip";
@@ -72,7 +73,12 @@ export default function Home() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1440px] px-4 py-6 md:px-8 md:py-10">
-      <Header direction={direction} onDirectionChange={setDirection} />
+      <Header />
+
+      <FlowDirectionTabs
+        direction={direction}
+        onDirectionChange={setDirection}
+      />
 
       <StatsStrip />
 
