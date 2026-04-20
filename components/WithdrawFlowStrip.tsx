@@ -12,9 +12,11 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 
-// 方案 v4.6 强调：所有 withdraw 路径都是三段式：
-// User Intent → Liquidity Check (decision) → 分支执行
-// 这是 Demo 技术高潮，必须视觉化展示。
+// 方案 v4.7：Withdraw 三段式重构
+// User Intent → Route Dispatch → Branch Execution
+//   - Route Dispatch 按资产类型分流：
+//       · Omnichain (LayerZero OFT/Adapter) → bypass，直通 OFT Delivery
+//       · 其他资产 → Liquidity Check 决策
 // 布局：横跨全宽放在 HighlightBanner 下方（仅 withdraw 模式显示），
 // 以横向 5 列 grid 展示 branch，高度压缩到最低以不挤压 Sankey。
 interface Branch {
@@ -23,6 +25,7 @@ interface Branch {
   sublabel: string;
   color: string;
   emphasize?: boolean;
+  bypass?: boolean; // Omnichain 不经过 Liquidity Check
 }
 
 const BRANCHES: Branch[] = [
@@ -48,10 +51,11 @@ const BRANCHES: Branch[] = [
   },
   {
     icon: RotateCw,
-    label: "OFT Rebalance",
-    sublabel: "Omnichain · 不经过 Solver",
+    label: "OFT Delivery",
+    sublabel: "Omnichain · Burn/Lock → Mint · bypass Liquidity Check",
     color: "#A855F7",
     emphasize: true,
+    bypass: true,
   },
   {
     icon: Lock,
@@ -75,7 +79,7 @@ export default function WithdrawFlowStrip() {
           </span>
         </div>
         <span className="text-[11px] text-muted">
-          User Intent → Liquidity Check → Branch Execution
+          User Intent → Route Dispatch → Branch Execution
         </span>
       </div>
 
@@ -98,8 +102,8 @@ export default function WithdrawFlowStrip() {
 
         <ArrowRight className="hidden h-4 w-4 shrink-0 self-center text-muted md:block" />
 
-        {/* Step 2: Liquidity Check (emphasized as Demo 技术高潮) */}
-        <div className="relative flex items-center gap-3 overflow-hidden rounded-xl border border-sky-500/50 bg-sky-500/[0.08] px-3 py-2.5 shadow-[0_0_22px_rgba(14,165,233,0.18)] md:w-[210px] md:min-h-[96px] md:flex-col md:items-start md:justify-center md:px-3.5 md:py-3">
+        {/* Step 2: Route Dispatch (按资产类型分流，Omnichain bypass Liquidity Check) */}
+        <div className="relative flex items-center gap-3 overflow-hidden rounded-xl border border-sky-500/50 bg-sky-500/[0.08] px-3 py-2.5 shadow-[0_0_22px_rgba(14,165,233,0.18)] md:w-[230px] md:min-h-[96px] md:flex-col md:items-start md:justify-center md:px-3.5 md:py-3">
           <div
             className="pointer-events-none absolute -right-4 -top-4 h-14 w-14 rounded-full bg-sky-500/25 blur-2xl"
             aria-hidden
@@ -109,13 +113,14 @@ export default function WithdrawFlowStrip() {
           </span>
           <div className="relative">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-sky-400">
-              Step 2 · Decision
+              Step 2 · Dispatch
             </div>
             <div className="mt-0.5 text-sm font-bold text-sky-100">
-              Liquidity Check
+              Route Dispatch
             </div>
             <div className="mt-0.5 text-[11px] leading-snug text-muted">
-              检查目标链库存是否充足
+              按资产类型分流：非 Omnichain 走 Liquidity Check；
+              <span className="text-purple-300">Omnichain 直通 OFT →</span>
             </div>
           </div>
         </div>
@@ -138,16 +143,31 @@ export default function WithdrawFlowStrip() {
                   className={clsx(
                     "inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] leading-tight transition-colors",
                     b.emphasize && "font-semibold",
+                    b.bypass && "border-dashed",
                   )}
                   style={{
-                    borderColor: b.color + (b.emphasize ? "60" : "30"),
+                    borderColor: b.color + (b.emphasize ? "80" : "30"),
                     backgroundColor: b.color + (b.emphasize ? "18" : "10"),
                     color: b.color,
+                    boxShadow: b.bypass
+                      ? `0 0 14px ${b.color}30, inset 0 0 0 1px ${b.color}30`
+                      : undefined,
                   }}
                   title={b.sublabel}
                 >
                   <Icon className="h-3.5 w-3.5 shrink-0" />
                   <span className="truncate">{b.label}</span>
+                  {b.bypass && (
+                    <span
+                      className="ml-auto rounded-sm px-1 py-px text-[9px] font-bold uppercase tracking-wider"
+                      style={{
+                        color: b.color,
+                        backgroundColor: b.color + "22",
+                      }}
+                    >
+                      bypass
+                    </span>
+                  )}
                 </span>
               );
             })}
@@ -158,7 +178,9 @@ export default function WithdrawFlowStrip() {
       <p className="mt-3 px-1 text-[10px] leading-relaxed text-muted">
         <span className="font-semibold text-foreground">叙事关键点：</span>
         {" "}
-        Omnichain 资产走 OFT Rebalancing 通道（与 Solver 网络并列、不经过 Solver）；
+        Omnichain 资产（LayerZero OFT / Adapter）通过 Burn→Mint 或 Lock→Mint 在目标链按需产生流动性，
+        <span className="text-purple-300">不经过 Liquidity Check、不经过 Solver</span>
+        （Route Details 中也不会出现该步骤）；其他资产仍走 Liquidity Check 决策，
         Source-only 资产库存不足时无 Solver 补位，这是方案口径，不是 Bug。
       </p>
     </div>

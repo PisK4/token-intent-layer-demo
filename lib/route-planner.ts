@@ -2,6 +2,12 @@ import { CHAIN_MAP, TOKEN_MAP, RAIL_META } from "./data-loader";
 import { ASSET_CLASS_META } from "./asset-class-meta";
 import type { Direction, PathStep, Rail, RoutePlan } from "./types";
 
+// Omnichain (LayerZero OFT / Adapter) 提现走 Burn→Mint 或 Lock→Mint，
+// 目标链流动性按需生成，不存在"目标链库存是否充足"的概念，因此跳过 Liquidity Check。
+function needsLiquidityCheck(rail: Rail): boolean {
+  return rail !== "layerzero";
+}
+
 export function planRoute(
   tokenSymbol: string,
   chainId: string,
@@ -135,17 +141,22 @@ export function planRoute(
       detail: `目标：${targetAccount}`,
     });
 
-    // Liquidity Check 决策节点：所有 withdraw 路径统一插入
-    // Source-only 检查的是源链库存；其他检查的是目标链库存
-    const checkScope =
-      token.commitment === "source-only"
-        ? `检查源链 ${chain.name} 上 ${token.symbol} 的 Vault 入金累积库存`
-        : `检查目标链 ${chain.name} 上 ${token.symbol} 的库存是否充足`;
-    steps.push({
-      label: "Liquidity Check · 目标链库存判定",
-      detail: checkScope,
-      status: "decision",
-    });
+    // Liquidity Check 决策节点：按资产类型分流
+    // - LayerZero OFT/Adapter：目标链流动性按需 Mint，跳过该步骤
+    // - source-only：检查的是源链 Vault 入金累积库存（而非目标链库存）
+    // - 其他：检查目标链库存是否充足
+    if (needsLiquidityCheck(rail)) {
+      const isSourceOnly = token.commitment === "source-only";
+      steps.push({
+        label: isSourceOnly
+          ? "Stock Check · 源链入金累积库存判定"
+          : "Liquidity Check · 目标链库存判定",
+        detail: isSourceOnly
+          ? `检查源链 ${chain.name} 上 ${token.symbol} 的 Vault 入金累积库存`
+          : `检查目标链 ${chain.name} 上 ${token.symbol} 的库存是否充足`,
+        status: "decision",
+      });
+    }
 
     if (token.commitment === "source-only") {
       steps.push({
@@ -194,22 +205,19 @@ export function planRoute(
         note = "Native Asset 库存不足时 solver 跨链 fill，用户仍收到原资产";
       }
     } else if (rail === "layerzero") {
-      if (stockSufficient) {
-        steps.push({
-          label: "目标链 Vault 直接交付",
-          protocol: "EdgeX Vault",
-          detail: `${token.symbol} 原 Token 交付`,
-          status: "normal",
-        });
-      } else {
-        steps.push({
-          label: "OFT Rebalancing · 跨链协议再平衡",
-          protocol: "LayerZero OFT",
-          detail: "从库存充裕链通过 OFT 协议跨链搬运，零价格冲击，不经过 Solver 网络",
-          status: "fallback",
-        });
-        note = "Omnichain-standard Asset 优先用跨链协议调度库存，Solver DEX 仅作降级";
-      }
+      // Omnichain 资产直接走 Burn/Mint（原生 OFT）或 Lock/Mint（Adapter），
+      // 目标链按需生成流动性，因此没有 stockSufficient 概念，也没有 fallback。
+      steps.push({
+        label: "LayerZero OFT 跨链交付",
+        protocol: "LayerZero OFT / Adapter",
+        detail:
+          "原生 OFT: Burn on source → Mint on target；" +
+          "Adapter: Lock on source → Mint on target。" +
+          "目标链流动性按需生成，无需 Liquidity Check。",
+        status: "normal",
+      });
+      note =
+        "Omnichain-standard Asset 通过 Burn/Mint 或 Lock/Mint 在目标链按需产生流动性，不走 Solver 网络、不做库存判定。";
     } else if (rail === "intent-layer") {
       steps.push({
         label: "Intent Layer solver 交付",

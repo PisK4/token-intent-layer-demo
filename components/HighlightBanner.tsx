@@ -63,7 +63,7 @@ const HIGHLIGHTS: Highlight[] = [
     icon: Shuffle,
     accent: "#EC4899",
     title: "Intent Gateway · 多协议 Fallback",
-    body: "EdgeX 自建 Token Router + Intent Gateway（非 solver network）；外部协议 UniswapX / CoW / 1inch / deBridge / Mayan 组合，主 / 备 / 应急三级兜底。",
+    body: "EdgeX 自建 Token Router + Intent Gateway；外部协议（意图匹配网络 + DEX 聚合器） UniswapX / CoW / 1inch / deBridge / Mayan 组合，主 / 备 / 应急三级兜底。",
   },
 ];
 
