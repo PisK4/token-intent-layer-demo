@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
+import StatsStrip from "@/components/StatsStrip";
 import HighlightBanner from "@/components/HighlightBanner";
+import WithdrawFlowStrip from "@/components/WithdrawFlowStrip";
 import TokenChainSelector from "@/components/TokenChainSelector";
 import SwapInterface from "@/components/SwapInterface";
 import SankeyDiagram from "@/components/SankeyDiagram";
@@ -18,6 +20,15 @@ export default function Home() {
   const [tokenSymbol, setTokenSymbol] = useState("stETH");
   const [stockSufficient, setStockSufficient] = useState(true);
   const [highlightVersion, setHighlightVersion] = useState(0);
+
+  // 设置 body data-direction 以便 CSS 切换背景色调（P2.3）
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.setAttribute("data-direction", direction);
+    return () => {
+      document.body.removeAttribute("data-direction");
+    };
+  }, [direction]);
 
   // 切到 Withdraw 时若当前 token 不可提现，自动 fallback 到该链上首个可提现 token（优先 USDC）
   useEffect(() => {
@@ -63,7 +74,15 @@ export default function Home() {
     <main className="mx-auto min-h-screen w-full max-w-[1440px] px-4 py-6 md:px-8 md:py-10">
       <Header direction={direction} onDirectionChange={setDirection} />
 
+      <StatsStrip />
+
       <HighlightBanner />
+
+      {direction === "withdraw" && (
+        <div className="mb-6">
+          <WithdrawFlowStrip />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(360px,420px)_1fr]">
         <aside className="flex flex-col gap-5">

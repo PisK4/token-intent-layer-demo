@@ -44,9 +44,18 @@ const config: Config = {
           "0%, 100%": { opacity: "0.6" },
           "50%": { opacity: "1" },
         },
+        "cta-pulse": {
+          "0%, 100%": {
+            boxShadow: "0 0 0 0 rgba(34, 197, 94, 0.35)",
+          },
+          "50%": {
+            boxShadow: "0 0 0 8px rgba(34, 197, 94, 0)",
+          },
+        },
       },
       animation: {
         "flow-pulse": "flow-pulse 2s ease-in-out infinite",
+        "cta-pulse": "cta-pulse 1.4s ease-in-out 2",
       },
     },
   },

@@ -4,8 +4,17 @@ import { CircleCheck, CircleAlert, GitFork, ArrowRight, Route } from "lucide-rea
 import clsx from "clsx";
 import { RAIL_META } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
-import type { RoutePlan } from "@/lib/types";
+import type { Commitment, RoutePlan } from "@/lib/types";
 import { ChainIcon, TokenIcon } from "./AssetIcon";
+
+function commitmentLabel(c: Commitment): { label: string; cls: string } {
+  if (c === "core") return { label: "Core · Strongest", cls: "pill-core" };
+  if (c === "source-only")
+    return { label: "Source-only", cls: "pill-source-only" };
+  if (c === "display-only")
+    return { label: "Display-only", cls: "pill-source-only" };
+  return { label: "Extended", cls: "pill-extended" };
+}
 
 interface Props {
   plan: RoutePlan | null;
@@ -28,25 +37,31 @@ export default function PathDetailCard({ plan }: Props) {
 
   const railMeta = RAIL_META[plan.rail];
   const assetMeta = ASSET_CLASS_META[plan.sourceToken.assetClass];
+  const commitment = commitmentLabel(plan.commitment);
 
   return (
     <div className="glass-card p-5">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-wider text-muted">
           <Route className="h-3.5 w-3.5" />
           Route Details
         </h2>
-        <span
-          className="pill"
-          style={{
-            backgroundColor: railMeta.color + "20",
-            color: railMeta.color,
-            borderColor: railMeta.color + "50",
-            border: "1px solid",
-          }}
-        >
-          {railMeta.label}
-        </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className={`pill ${commitment.cls}`} title="EdgeX 对该资产的承诺等级">
+            {commitment.label}
+          </span>
+          <span
+            className="pill"
+            style={{
+              backgroundColor: railMeta.color + "20",
+              color: railMeta.color,
+              borderColor: railMeta.color + "50",
+              border: "1px solid",
+            }}
+          >
+            {railMeta.label}
+          </span>
+        </div>
       </div>
 
       <div className="mb-4 flex items-center gap-2 text-sm">

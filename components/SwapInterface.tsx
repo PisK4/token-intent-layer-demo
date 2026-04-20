@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowDown, Sparkles, Info } from "lucide-react";
 import clsx from "clsx";
 import { TOKEN_MAP, CHAIN_MAP, RAIL_META } from "@/lib/data-loader";
@@ -79,6 +79,14 @@ export default function SwapInterface({
   const rail = token.rails[0];
   const railMeta = RAIL_META[rail];
 
+  // 方案 v4.6：commitment 等级决定用户可期望的服务保障
+  const commitmentNote =
+    token.commitment === "core"
+      ? `Core Commitment · ${railMeta.label} canonical settlement`
+      : token.commitment === "source-only"
+        ? `Source-only Commitment · 源链闭环，无 Solver 补位`
+        : `Extended Commitment · ${railMeta.label} + Solver fallback`;
+
   const defaultAmount =
     token.symbol === "USDC"
       ? "1000"
@@ -93,6 +101,14 @@ export default function SwapInterface({
               : "100";
 
   const [amount, setAmount] = useState(defaultAmount);
+  // CTA 首次加载 2s 后闪动一次引导注意力；点击一次后不再闪
+  const [ctaHinted, setCtaHinted] = useState(false);
+  const [ctaAttention, setCtaAttention] = useState(false);
+  useEffect(() => {
+    if (ctaHinted) return;
+    const t = setTimeout(() => setCtaAttention(true), 1800);
+    return () => clearTimeout(t);
+  }, [ctaHinted]);
 
   const { targetAmount, targetLabel, usdValue, yieldPremium } = useMemo(() => {
     const numeric = Number(amount) || 0;
@@ -210,14 +226,15 @@ export default function SwapInterface({
           </div>
         </div>
 
-        <div className="relative flex items-center justify-center py-1">
-          <div className="absolute inset-x-6 h-px bg-white/5" />
+        <div className="relative flex flex-col items-center justify-center gap-1 py-1">
+          <div className="absolute inset-x-6 top-4 h-px bg-white/5" />
           <div className="relative flex items-center gap-2 rounded-full border border-white/10 bg-surface-elevated px-3 py-1.5 text-[11px]">
             <ArrowDown className="h-3.5 w-3.5" style={{ color: railMeta.color }} />
             <span className="font-medium" style={{ color: railMeta.color }}>
               via {railMeta.label}
             </span>
           </div>
+          <span className="text-[10px] text-muted">{commitmentNote}</span>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-black/20 p-3.5">
@@ -271,7 +288,17 @@ export default function SwapInterface({
         </p>
       </div>
 
-      <button onClick={onPreview} className="btn-primary mt-3 w-full">
+      <button
+        onClick={() => {
+          setCtaHinted(true);
+          setCtaAttention(false);
+          onPreview();
+        }}
+        className={clsx(
+          "btn-primary mt-3 w-full",
+          ctaAttention && !ctaHinted && "animate-cta-pulse",
+        )}
+      >
         <Sparkles className="h-4 w-4" />
         Preview Route on Sankey
       </button>

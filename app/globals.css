@@ -28,6 +28,22 @@
       #0b1120;
     color: var(--color-foreground);
     min-height: 100vh;
+    transition: background 600ms ease-in-out;
+  }
+
+  /* Withdraw 方向：减弱 green、增强 amber，提供潜意识方向感 */
+  body[data-direction="withdraw"] {
+    background: radial-gradient(
+        ellipse 80% 60% at 50% -20%,
+        rgba(245, 158, 11, 0.08),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 100% 100%,
+        rgba(249, 115, 22, 0.05),
+        transparent 60%
+      ),
+      #0b1120;
   }
 
   body {

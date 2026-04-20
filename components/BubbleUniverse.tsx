@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import { Check, Zap, RotateCw, Lock } from "lucide-react";
 import { TOKENS, isWithdrawable, CHAIN_MAP } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
 import type { AssetClass, Direction, Token } from "@/lib/types";
@@ -60,27 +61,30 @@ export default function BubbleUniverse({
       itemStyle: { color: ASSET_CLASS_META[ac].color },
     }));
 
+    const hasSelection = !!selectedTokenSymbol;
     const nodes = visible.map((t) => {
       const meta = ASSET_CLASS_META[t.assetClass];
       const selected = t.symbol === selectedTokenSymbol;
+      // 选中态：symbolSize × 1.15 + 强 glow；其他 token opacity 降至 0.5 以聚焦
+      const baseSize = sizeFor(t.chains.length);
       return {
         id: t.symbol,
         name: t.symbol,
         category: presentClasses.indexOf(t.assetClass),
-        symbolSize: sizeFor(t.chains.length),
+        symbolSize: selected ? Math.round(baseSize * 1.15) : baseSize,
         value: t.chains.length,
         itemStyle: {
           color: meta.color,
           borderColor: selected ? "#F8FAFC" : "rgba(255,255,255,0.15)",
           borderWidth: selected ? 3 : 1,
-          shadowBlur: selected ? 24 : 0,
+          shadowBlur: selected ? 32 : 0,
           shadowColor: meta.color,
-          opacity: 0.92,
+          opacity: hasSelection && !selected ? 0.5 : 0.92,
         },
         label: {
           show: true,
           color: "#FFFFFF",
-          fontSize: 11,
+          fontSize: selected ? 12 : 11,
           fontWeight: 700,
           formatter: "{b}",
         },
@@ -230,11 +234,11 @@ export default function BubbleUniverse({
         </div>
       </div>
 
-      <div className="mb-3 flex flex-wrap gap-1.5 px-1">
+      <div className="mb-2 flex flex-wrap gap-1.5 px-1">
         {Object.entries(ASSET_CLASS_META).map(([key, meta]) => (
           <span
             key={key}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[10px]"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[11px]"
           >
             <span
               className="inline-block h-1.5 w-1.5 rounded-full"
@@ -243,6 +247,45 @@ export default function BubbleUniverse({
             <span className="text-muted">{meta.label}</span>
           </span>
         ))}
+      </div>
+
+      {/* Scheduling Mechanism mini legend — 方案 v4.6 强调 OFT vs Solver 对比 */}
+      <div className="mb-3 flex flex-wrap items-center gap-1.5 border-t border-white/5 pt-2 px-1">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+          Withdraw Scheduling:
+        </span>
+        <span
+          className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px]"
+          style={{ borderColor: "#3B82F640", backgroundColor: "#3B82F610", color: "#60A5FA" }}
+          title="Canonical USDC 通过 CCTP 直达；Solver 仅极端 fallback"
+        >
+          <Check className="h-2.5 w-2.5" />
+          CCTP Canonical
+        </span>
+        <span
+          className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px]"
+          style={{ borderColor: "#F59E0B40", backgroundColor: "#F59E0B10", color: "#FBBF24" }}
+          title="Native / Routable 资产库存不足时 Solver 网络跨链 fill"
+        >
+          <Zap className="h-2.5 w-2.5" />
+          Solver Network
+        </span>
+        <span
+          className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px]"
+          style={{ borderColor: "#A855F740", backgroundColor: "#A855F710", color: "#C084FC" }}
+          title="Omnichain 资产走 LayerZero OFT 再平衡 — 不经过 Solver 网络"
+        >
+          <RotateCw className="h-2.5 w-2.5" />
+          OFT Rebalance · No Solver
+        </span>
+        <span
+          className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px]"
+          style={{ borderColor: "#F9731640", backgroundColor: "#F9731610", color: "#FB923C" }}
+          title="Source-only 资产库存 = 入金累积，无 solver 补位"
+        >
+          <Lock className="h-2.5 w-2.5" />
+          Source-only · No Scheduling
+        </span>
       </div>
 
       <div className="h-[380px] w-full md:h-[440px]">

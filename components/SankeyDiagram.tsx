@@ -3,10 +3,11 @@
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { buildSankeyData } from "@/lib/sankey-data";
+import clsx from "clsx";
+import { buildSankeyData, CORE_LEDGERS } from "@/lib/sankey-data";
 import { TOKEN_MAP, CHAIN_MAP, RAIL_META } from "@/lib/data-loader";
 import { ASSET_CLASS_META } from "@/lib/asset-class-meta";
-import type { Direction } from "@/lib/types";
+import type { Direction, Rail } from "@/lib/types";
 
 const ReactECharts = dynamic(() => import("echarts-for-react"), {
   ssr: false,
@@ -36,18 +37,23 @@ export default function SankeyDiagram({
     const { nodes, links } = buildSankeyData(direction);
 
     const highlightSet = new Set<string>();
+    let highlightRailColor = "#22C55E";
     if (highlightTokenSymbol && highlightChainId) {
       const token = TOKEN_MAP[highlightTokenSymbol];
       const chain = CHAIN_MAP[highlightChainId];
       if (token && chain && token.chains.includes(highlightChainId)) {
         const assetLabel = ASSET_CLASS_META[token.assetClass].label;
-        const railLabel = RAIL_META[token.rails[0]].label;
+        const primaryRail = token.rails[0] as Rail;
+        const railLabel = RAIL_META[primaryRail].label;
+        highlightRailColor = RAIL_META[primaryRail].color;
         const ledger =
           token.finalAccount === "USDC"
             ? "USDC @ EdgeX"
             : token.finalAccount === "ETH"
               ? "ETH @ EdgeX"
-              : "Token @ EdgeX";
+              : token.finalAccount === "SOL"
+                ? "SOL @ EdgeX"
+                : "Token @ EdgeX";
         highlightSet.add(chain.name);
         highlightSet.add(assetLabel);
         highlightSet.add(railLabel);
@@ -55,31 +61,67 @@ export default function SankeyDiagram({
       }
     }
 
+    const hasHighlight = highlightSet.size > 0;
+
     const highlightedLinks = links.map((link) => {
       const onPath =
         highlightSet.has(link.source) && highlightSet.has(link.target);
+      // 高亮路径使用 rail 色 → accent 绿渐变（沿 source→target）；
+      // 非高亮路径 opacity 降至 0.04（对比更强烈）。
+      if (onPath) {
+        return {
+          ...link,
+          lineStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 1,
+              y2: 0,
+              colorStops: [
+                { offset: 0, color: highlightRailColor },
+                { offset: 1, color: "#22C55E" },
+              ],
+              global: false,
+            },
+            opacity: 0.95,
+          },
+        };
+      }
       return {
         ...link,
         lineStyle: {
           color: link.lineStyle?.color ?? "#94A3B8",
-          opacity: onPath ? 0.95 : highlightSet.size > 0 ? 0.08 : 0.35,
+          opacity: hasHighlight ? 0.04 : 0.35,
         },
       };
     });
 
     const highlightedNodes = nodes.map((n) => {
       const on = highlightSet.has(n.name);
+      const isCoreLedger = CORE_LEDGERS.has(n.name);
       return {
         ...n,
         itemStyle: {
           ...n.itemStyle,
-          opacity: highlightSet.size > 0 && !on ? 0.25 : 1,
-          borderColor: on ? "#22C55E" : "transparent",
-          borderWidth: on ? 2 : 0,
+          opacity: hasHighlight && !on ? 0.22 : 1,
+          borderColor: on
+            ? "#22C55E"
+            : isCoreLedger
+              ? "rgba(34, 197, 94, 0.6)"
+              : "transparent",
+          borderWidth: on ? 2 : isCoreLedger ? 1.5 : 0,
+          shadowBlur: on ? 20 : isCoreLedger ? 8 : 0,
+          shadowColor: on ? "#22C55E" : isCoreLedger ? "#22C55E" : "transparent",
         },
         label: {
-          color: on ? "#F8FAFC" : "#CBD5E1",
-          fontWeight: on ? 700 : 500,
+          color: on
+            ? "#F8FAFC"
+            : isCoreLedger
+              ? "#F8FAFC"
+              : "#CBD5E1",
+          fontWeight: on ? 700 : isCoreLedger ? 600 : 500,
+          fontSize: isCoreLedger ? 12 : on ? 12 : 11,
         },
       };
     });
@@ -188,18 +230,42 @@ export default function SankeyDiagram({
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {Object.values(RAIL_META).map((r) => (
-            <span
-              key={r.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[10px]"
-            >
+          {Object.entries(RAIL_META).map(([railKey, r]) => {
+            // 高亮当前 token 使用的 rail（来自 highlightTokenSymbol 的 primaryRail）
+            const isActive =
+              !!highlightTokenSymbol &&
+              TOKEN_MAP[highlightTokenSymbol]?.rails[0] === railKey;
+            return (
               <span
-                className="inline-block h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: r.color }}
-              />
-              <span className="text-muted">{r.label}</span>
-            </span>
-          ))}
+                key={r.label}
+                className={clsx(
+                  "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] transition-all",
+                  isActive
+                    ? "bg-black/40 shadow-[0_0_12px_rgba(255,255,255,0.1)]"
+                    : "border-white/10 bg-black/20",
+                )}
+                style={
+                  isActive
+                    ? {
+                        borderColor: r.color + "80",
+                        boxShadow: `0 0 12px ${r.color}40`,
+                      }
+                    : undefined
+                }
+              >
+                <span
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: r.color }}
+                />
+                <span
+                  className={isActive ? "font-semibold" : "text-muted"}
+                  style={isActive ? { color: r.color } : undefined}
+                >
+                  {r.label}
+                </span>
+              </span>
+            );
+          })}
         </div>
       </div>
 

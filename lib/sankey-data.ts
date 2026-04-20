@@ -20,12 +20,27 @@ function depthOf(
   return { ledger: 0, rail: 1, asset: 2, chain: 3 }[kind];
 }
 
-const LEDGER_ACCOUNTS = ["USDC @ EdgeX", "ETH @ EdgeX", "Token @ EdgeX"];
+// 方案 v4.6：核心资产归一化终态三类（USDC / ETH / SOL），SOL 由 jitoSOL/mSOL
+// 路径打开。将 SOL 从 "Token @ EdgeX" 中拆出以视觉化三终态。
+const LEDGER_ACCOUNTS = [
+  "USDC @ EdgeX",
+  "ETH @ EdgeX",
+  "SOL @ EdgeX",
+  "Token @ EdgeX",
+];
+
+const CORE_LEDGERS = new Set([
+  "USDC @ EdgeX",
+  "ETH @ EdgeX",
+  "SOL @ EdgeX",
+]);
+
+export { CORE_LEDGERS };
 
 const FINAL_LEDGER_MAP: Record<string, string> = {
   USDC: "USDC @ EdgeX",
   ETH: "ETH @ EdgeX",
-  SOL: "Token @ EdgeX",
+  SOL: "SOL @ EdgeX",
   self: "Token @ EdgeX",
 };
 
@@ -95,11 +110,9 @@ export function buildSankeyData(direction: Direction): SankeyDataset {
     const railNode = railMeta.label;
     addNode(railNode, railMeta.color, depthOf("rail", direction));
 
-    const ledger = FINAL_LEDGER_MAP[token.finalAccount] ?? LEDGER_ACCOUNTS[2];
-    const ledgerColor =
-      token.finalAccount === "USDC" || token.finalAccount === "ETH"
-        ? "#22C55E"
-        : "#3B82F6";
+    const ledger = FINAL_LEDGER_MAP[token.finalAccount] ?? LEDGER_ACCOUNTS[3];
+    // 三核心终态（USDC/ETH/SOL）用 accent 绿以 highlight 归一化；其他用蓝。
+    const ledgerColor = CORE_LEDGERS.has(ledger) ? "#22C55E" : "#3B82F6";
     addNode(ledger, ledgerColor, depthOf("ledger", direction));
 
     for (const chainId of token.chains) {
