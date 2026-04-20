@@ -1,0 +1,23 @@
+[
+  { "symbol": "ETH", "chain": "ethereum", "balance": 2.5 },
+  { "symbol": "USDC", "chain": "ethereum", "balance": 3200 },
+  { "symbol": "stETH", "chain": "ethereum", "balance": 1.8 },
+  { "symbol": "wstETH", "chain": "ethereum", "balance": 0.5 },
+  { "symbol": "aUSDC", "chain": "ethereum", "balance": 1500 },
+  { "symbol": "sUSDe", "chain": "ethereum", "balance": 800 },
+  { "symbol": "MOG", "chain": "ethereum", "balance": 1200000 },
+  { "symbol": "PEPE", "chain": "ethereum", "balance": 12000000 },
+  { "symbol": "UNI", "chain": "ethereum", "balance": 3.2 },
+  { "symbol": "ONDO", "chain": "ethereum", "balance": 45 },
+  { "symbol": "LIT", "chain": "ethereum", "balance": 5 },
+  { "symbol": "BONK", "chain": "solana", "balance": 120000 },
+  { "symbol": "WIF", "chain": "solana", "balance": 2.5 },
+  { "symbol": "SOL", "chain": "solana", "balance": 0.8 },
+  { "symbol": "JUP", "chain": "solana", "balance": 8 },
+  { "symbol": "BGB", "chain": "bsc", "balance": 8 },
+  { "symbol": "jitoSOL", "chain": "solana", "balance": 0.3 },
+  { "symbol": "LINK", "chain": "ethereum", "balance": 5 },
+  { "symbol": "ARB", "chain": "arbitrum", "balance": 10 },
+  { "symbol": "DEEP", "chain": "sui", "balance": 30 },
+  { "symbol": "CETUS", "chain": "sui", "balance": 50 }
+]

@@ -3,8 +3,10 @@
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
+  BotMessageSquare,
   Sparkles,
   Target,
+  Scan,
   type LucideIcon,
 } from "lucide-react";
 import clsx from "clsx";
@@ -33,7 +35,7 @@ const TABS: TabConfig[] = [
     badgeIcon: Target,
     title: "Deposit",
     subtitle: "Source Chain → EdgeX",
-    hint: "收益归一化 · 三核心终态",
+    hint: "多链多 Token · 一键快速入金",
     accent: "#22C55E",
   },
   {
@@ -42,8 +44,17 @@ const TABS: TabConfig[] = [
     badgeIcon: Sparkles,
     title: "Withdraw",
     subtitle: "EdgeX → Target Chain",
-    hint: "技术高潮 · 三段式决策",
+    hint: "提现任意链 · 智能选路 + 流动性兜底",
     accent: "#F59E0B",
+  },
+  {
+    id: "ask-ai",
+    icon: BotMessageSquare,
+    badgeIcon: Scan,
+    title: "Ask AI",
+    subtitle: "Wallet Intelligence",
+    hint: "扫描钱包 · 发现 Dust + Yield · 一键优化",
+    accent: "#06B6D4",
   },
 ];
 
@@ -71,7 +82,7 @@ export default function FlowDirectionTabs({
       <div
         role="tablist"
         aria-label="Flow direction"
-        className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-3"
+        className="grid grid-cols-1 gap-2 md:grid-cols-3 md:gap-3"
       >
         {TABS.map((t) => {
           const active = direction === t.id;

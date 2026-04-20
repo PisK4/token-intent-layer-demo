@@ -11,6 +11,7 @@ import SwapInterface from "@/components/SwapInterface";
 import SankeyDiagram from "@/components/SankeyDiagram";
 import PathDetailCard from "@/components/PathDetailCard";
 import BubbleUniverse from "@/components/BubbleUniverse";
+import AskAiPanel from "@/components/AskAiPanel";
 import { planRoute } from "@/lib/route-planner";
 import { TOKENS, TOKEN_MAP, isWithdrawable } from "@/lib/data-loader";
 import type { Direction } from "@/lib/types";
@@ -51,7 +52,10 @@ export default function Home() {
   }, [direction, chainId, tokenSymbol]);
 
   const plan = useMemo(
-    () => planRoute(tokenSymbol, chainId, direction, stockSufficient),
+    () =>
+      direction === "ask-ai"
+        ? null
+        : planRoute(tokenSymbol, chainId, direction, stockSufficient),
     [tokenSymbol, chainId, direction, stockSufficient],
   );
 
@@ -70,6 +74,19 @@ export default function Home() {
     },
     [chainId],
   );
+
+  // Ask AI → Deposit 联动：从 AI 面板选定 token 后跳转到 Deposit 视图
+  const onNavigateToDeposit = useCallback(
+    (symbol: string, chain: string) => {
+      setDirection("deposit");
+      setTokenSymbol(symbol);
+      setChainId(chain);
+      setHighlightVersion((v) => v + 1);
+    },
+    [],
+  );
+
+  const isAskAi = direction === "ask-ai";
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1440px] px-4 py-6 md:px-8 md:py-10">
@@ -90,40 +107,44 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(360px,420px)_1fr]">
-        <aside className="flex flex-col gap-5">
-          <TokenChainSelector
-            direction={direction}
-            selectedChainId={chainId}
-            selectedTokenSymbol={tokenSymbol}
-            onChainChange={setChainId}
-            onTokenChange={setTokenSymbol}
-          />
-          <PathDetailCard plan={plan} />
-          <SwapInterface
-            direction={direction}
-            tokenSymbol={tokenSymbol}
-            chainId={chainId}
-            stockSufficient={stockSufficient}
-            onToggleStock={() => setStockSufficient((s) => !s)}
-            onPreview={onPreview}
-          />
-        </aside>
+      {isAskAi ? (
+        <AskAiPanel onNavigateToDeposit={onNavigateToDeposit} />
+      ) : (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(360px,420px)_1fr]">
+          <aside className="flex flex-col gap-5">
+            <TokenChainSelector
+              direction={direction}
+              selectedChainId={chainId}
+              selectedTokenSymbol={tokenSymbol}
+              onChainChange={setChainId}
+              onTokenChange={setTokenSymbol}
+            />
+            <PathDetailCard plan={plan} />
+            <SwapInterface
+              direction={direction}
+              tokenSymbol={tokenSymbol}
+              chainId={chainId}
+              stockSufficient={stockSufficient}
+              onToggleStock={() => setStockSufficient((s) => !s)}
+              onPreview={onPreview}
+            />
+          </aside>
 
-        <section className="flex min-h-[640px] flex-col gap-5">
-          <SankeyDiagram
-            direction={direction}
-            highlightTokenSymbol={tokenSymbol}
-            highlightChainId={chainId}
-            highlightVersion={highlightVersion}
-          />
-          <BubbleUniverse
-            direction={direction}
-            selectedTokenSymbol={tokenSymbol}
-            onSelectToken={onSelectTokenFromBubble}
-          />
-        </section>
-      </div>
+          <section className="flex min-h-[640px] flex-col gap-5">
+            <SankeyDiagram
+              direction={direction}
+              highlightTokenSymbol={tokenSymbol}
+              highlightChainId={chainId}
+              highlightVersion={highlightVersion}
+            />
+            <BubbleUniverse
+              direction={direction}
+              selectedTokenSymbol={tokenSymbol}
+              onSelectToken={onSelectTokenFromBubble}
+            />
+          </section>
+        </div>
+      )}
 
       <footer className="mt-10 border-t border-white/5 pt-5 text-center text-[11px] text-muted">
         EdgeX Intent Layer Demo · 仅用于方案演示，不代表生产实现

@@ -17,7 +17,7 @@ export type Rail =
 
 export type Commitment = "core" | "extended" | "source-only" | "display-only";
 
-export type Direction = "deposit" | "withdraw";
+export type Direction = "deposit" | "withdraw" | "ask-ai";
 
 export interface Chain {
   id: string;
