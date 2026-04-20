@@ -153,7 +153,7 @@ export function planRoute(
           : "Liquidity Check · 目标链库存判定",
         detail: isSourceOnly
           ? `检查源链 ${chain.name} 上 ${token.symbol} 的 Vault 入金累积库存`
-          : `检查目标链 ${chain.name} 上 ${token.symbol} 的库存是否充足`,
+          : `检查目标链 ${chain.name} 上 ${token.symbol} 的库存是否充足, 决定是否走 solver 网络跨链调度`,
         status: "decision",
       });
     }
@@ -183,7 +183,7 @@ export function planRoute(
         steps.push({
           label: "目标链 Vault 直接交付",
           protocol: "EdgeX Vault",
-          detail: `${token.symbol} 同资产交付，无需跨链调度`,
+          detail: `${token.symbol} 同资产交付，无需 Solver 跨链调度`,
           status: "normal",
         });
       } else if (token.assetClass === "routable") {
@@ -224,8 +224,8 @@ export function planRoute(
         protocol: "CoW / UniswapX / 1inch",
         detail:
           token.finalAccount === "USDC" ||
-          token.finalAccount === "ETH" ||
-          token.finalAccount === "SOL"
+            token.finalAccount === "ETH" ||
+            token.finalAccount === "SOL"
             ? "按核心资产路径交付"
             : `solver 在 ${chain.name} 买入原 Token 交付`,
         status: stockSufficient ? "normal" : "fallback",
