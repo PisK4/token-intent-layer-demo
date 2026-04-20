@@ -15,13 +15,13 @@ export const ASSET_CLASS_META: Record<
     label: "Native Asset",
     color: "#22C55E",
     description:
-      "ETH / SOL / EDGE 等原生资产；Vault 直接交付，库存不足时 solver 跨链 fill",
+      "ETH / SOL / AVAX / BNB 等 L1/L2 原生资产；Vault 直接交付，库存不足时 solver 跨链 fill",
   },
   omnichain: {
     label: "Omnichain Standard",
     color: "#06B6D4",
     description:
-      "OFT/NTT 互通资产（ENA / AAVE / LINK）；库存不足走跨链协议再平衡，不走 Solver",
+      "OFT/NTT 互通资产（ENA / AAVE / LINK / EDGE / MARU）；库存不足走跨链协议再平衡，不走 Solver",
   },
   yield: {
     label: "Yield Collateral",

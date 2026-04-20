@@ -184,7 +184,7 @@ export function planRoute(
         });
         note = "Routable Asset 库存不足时 solver 在任意支持链买入并跨链交付，用户仍收到原 Token";
       } else {
-        // Native Asset（ETH / SOL / EDGE / AVAX / POL / BNB / HYPE / APT / SUI / SEI）
+        // Native Asset（ETH / SOL / AVAX / POL / BNB / HYPE / APT / SUI / SEI）
         steps.push({
           label: "Solver 网络跨链调度",
           protocol: "UniswapX / CoW / 1inch",
